@@ -1,0 +1,78 @@
+name: Python Linting
+description: Run linting using pylint, black, and mypy.
+author: Jason Miller
+
+branding:
+  icon: check-square
+  color: green
+
+inputs:
+  pylint_options:
+    description: The pylint options to pass to pylint.
+    required: false
+
+  black_options:
+    description: The black options to pass to black.
+    required: false
+
+  mypy_options:
+    description: The mypy options to pass to mypy.
+    required: false
+
+
+runs:
+  using: composite
+  steps:
+    - run: pip3 install pylint black mypy
+      shell: bash
+
+    - run: pylint ${{ inputs.pylint_optiions }} --output-format=github,text:pylint_output.txt --reports=y --jobs=0 2>&1 | tee pylint_output.txt
+      shell: bash
+
+    - run: |
+        if [ -f pylint_output.txt ]
+          echo "## Pylint :tada:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          cat pylint_output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## Pylint :x:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "```text" >> $GITHUB_STEP_SUMMARY
+          echo "No Output from Pylint" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+      shell: bash
+      if: always()
+
+    - run: black ${{ inputs.black_optiions }} --output-format=github,text:black_output.txt --reports=y --jobs=0 2>&1 | tee pylint_output.txt
+      shell: bash
+
+    - run: |
+        if [ -f black_output.txt ]
+          echo "## Black :tada:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```text' >> $GITHUB_STEP_SUMMARY
+          cat pylint_output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "## Black :x:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "```text" >> $GITHUB_STEP_SUMMARY
+          echo "No Output from Black" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+      shell: bash
+      if: always()
+
+    
+
+
+
+
+
