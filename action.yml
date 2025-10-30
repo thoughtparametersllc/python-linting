@@ -42,7 +42,7 @@ runs:
       shell: bash
       if: always()
 
-    - run: black ${{ inputs.black_optiions }} . 2>&1 | tee black_output.txt
+    - run: black --check ${{ inputs.black_optiions }} . 2>&1 | tee black_output.txt
       shell: bash
       if: always()
 
