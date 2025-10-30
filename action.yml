@@ -50,7 +50,7 @@ runs:
           echo "## Black :tada:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
-          cat pylint_output.txt >> $GITHUB_STEP_SUMMARY
+          cat black_output.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           rm -f black_output.txt
