@@ -1,0 +1,71 @@
+name: Workflow Issue
+description: Report an issue with the repository workflows (CI/CD)
+title: "[Workflow]: "
+labels: ["workflow", "ci/cd"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report issues related to the repository's GitHub Actions workflows.
+
+  - type: dropdown
+    id: workflow-name
+    attributes:
+      label: Workflow Name
+      description: Which workflow is having issues?
+      options:
+        - test-action.yml
+        - changelog-check.yml
+        - lint-test.yml
+        - release.yml
+        - security-audit.yml
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: Describe the workflow issue
+      placeholder: "The workflow fails when..."
+    validations:
+      required: true
+
+  - type: input
+    id: run-id
+    attributes:
+      label: Workflow Run ID or URL
+      description: Link to the failing workflow run
+      placeholder: "https://github.com/thoughtparametersllc/python-linting/actions/runs/..."
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: Copy relevant error logs from the workflow run
+      render: shell
+
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: How often does this occur?
+      options:
+        - Always
+        - Sometimes
+        - Once
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Suggested Fix
+      description: If you have an idea for fixing this, please describe it
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that might be helpful

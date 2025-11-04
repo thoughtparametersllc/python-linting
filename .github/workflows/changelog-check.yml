@@ -1,0 +1,92 @@
+name: Changelog Check
+
+# This workflow validates that CHANGELOG.md has been updated in PRs
+# It ensures that changes are properly documented before merging
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  check-changelog:
+    name: Verify Changelog Updated
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          # Get list of changed files (excluding the changelog itself from this check)
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check if any substantive files were changed (not just docs or CI)
+          SUBSTANTIVE_CHANGES=$(echo "$CHANGED_FILES" | grep -vE '^(\.github/|CHANGELOG\.md|README\.md|LICENSE|\.gitignore)' || true)
+          
+          if [ -z "$SUBSTANTIVE_CHANGES" ]; then
+            echo "substantive_changes=false" >> $GITHUB_OUTPUT
+            echo "Only documentation or CI files changed, changelog update not required"
+          else
+            echo "substantive_changes=true" >> $GITHUB_OUTPUT
+            echo "Substantive changes detected, checking changelog..."
+          fi
+
+      - name: Check if CHANGELOG.md was modified
+        id: changelog-modified
+        if: steps.changed-files.outputs.substantive_changes == 'true'
+        run: |
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "CHANGELOG.md"; then
+            echo "changelog_updated=true" >> $GITHUB_OUTPUT
+            echo "✓ CHANGELOG.md has been updated"
+          else
+            echo "changelog_updated=false" >> $GITHUB_OUTPUT
+            echo "✗ CHANGELOG.md has not been updated"
+          fi
+
+      - name: Verify changelog has content for this PR
+        if: steps.changed-files.outputs.substantive_changes == 'true' && steps.changelog-modified.outputs.changelog_updated == 'true'
+        run: |
+          echo "Checking CHANGELOG.md content..."
+          
+          # Check if there's content in the Unreleased section
+          if grep -A 10 "## \[Unreleased\]" CHANGELOG.md | grep -qE "^### (Added|Changed|Deprecated|Removed|Fixed|Security)"; then
+            echo "✓ CHANGELOG.md has entries in the Unreleased section"
+          else
+            echo "⚠ Warning: CHANGELOG.md may not have entries in the Unreleased section"
+            echo "Please ensure changes are documented under ## [Unreleased]"
+            exit 1
+          fi
+
+      - name: Fail if changelog not updated
+        if: steps.changed-files.outputs.substantive_changes == 'true' && steps.changelog-modified.outputs.changelog_updated == 'false'
+        run: |
+          echo "❌ CHANGELOG.md must be updated when making substantive changes"
+          echo ""
+          echo "Please add an entry to CHANGELOG.md under the [Unreleased] section."
+          echo "Follow the Keep a Changelog format:"
+          echo ""
+          echo "## [Unreleased]"
+          echo ""
+          echo "### Added"
+          echo "- New features"
+          echo ""
+          echo "### Changed"
+          echo "- Changes in existing functionality"
+          echo ""
+          echo "### Fixed"
+          echo "- Bug fixes"
+          echo ""
+          exit 1
+
+      - name: Success message
+        if: steps.changed-files.outputs.substantive_changes == 'false' || steps.changelog-modified.outputs.changelog_updated == 'true'
+        run: |
+          echo "✅ Changelog check passed!"
