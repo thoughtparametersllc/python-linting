@@ -43,7 +43,13 @@ runs:
       shell: bash
 
     - name: Install additional requirements
-      run: pip3 install -r ${{ inputs.requirements-file }}
+      run: |
+        if [ -f "${{ inputs.requirements-file }}" ]; then
+          pip3 install -r ${{ inputs.requirements-file }}
+        else
+          echo "Requirements file not found: ${{ inputs.requirements-file }}"
+          exit 1
+        fi
       shell: bash
       if: inputs.requirements-file != ''
 
