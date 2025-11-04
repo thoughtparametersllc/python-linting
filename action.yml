@@ -7,6 +7,16 @@ branding:
   color: green
 
 inputs:
+  python-version:
+    description: Python version to use for linting. If not specified, uses the default Python available on the runner.
+    required: false
+    default: '3.x'
+
+  requirements-file:
+    description: Path to a requirements file to install before linting. If not specified, only pylint, black, and mypy will be installed.
+    required: false
+    default: ''
+
   pylint_options:
     description: The pylint options to pass to pylint.
     required: false
@@ -23,10 +33,21 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: pip3 install pylint black mypy
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install linting tools
+      run: pip3 install pylint black mypy
       shell: bash
 
-    - run: pylint ${{ inputs.pylint_optiions }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt
+    - name: Install additional requirements
+      run: pip3 install -r ${{ inputs.requirements-file }}
+      shell: bash
+      if: inputs.requirements-file != ''
+
+    - run: pylint ${{ inputs.pylint_options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt
       shell: bash
       if: always()
 
@@ -42,7 +63,7 @@ runs:
       shell: bash
       if: always()
 
-    - run: black --check ${{ inputs.black_optiions }} . 2>&1 | tee black_output.txt
+    - run: black --check ${{ inputs.black_options }} . 2>&1 | tee black_output.txt
       shell: bash
       if: always()
 
@@ -57,7 +78,7 @@ runs:
       shell: bash
       if: always()
 
-    - run: mypy ${{ inputs.mypy_optiions }} . 2>&1 | tee mypy_output.txt
+    - run: mypy ${{ inputs.mypy_options }} . 2>&1 | tee mypy_output.txt
       shell: bash
       if: always()
 
