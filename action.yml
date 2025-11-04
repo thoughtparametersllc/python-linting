@@ -39,6 +39,21 @@ inputs:
     required: false
     default: '.github/badges'
 
+  update-readme:
+    description: Automatically update README.md with badge references.
+    required: false
+    default: 'false'
+
+  readme-path:
+    description: Path to README.md file to update with badges.
+    required: false
+    default: 'README.md'
+
+  badge-style:
+    description: Badge style - 'url' for GitHub URLs or 'path' for relative paths.
+    required: false
+    default: 'path'
+
 
 runs:
   using: composite
@@ -183,20 +198,52 @@ runs:
       shell: bash
       if: always()
 
+    - name: Update README with badges
+      run: |
+        if [ "${{ inputs.update-readme }}" == "true" ]; then
+          SCRIPT_DIR="${{ github.action_path }}"
+          
+          # Build command arguments
+          CMD="python3 ${SCRIPT_DIR}/update_badges.py"
+          CMD="$CMD --readme ${{ inputs.readme-path }}"
+          CMD="$CMD --badges-dir ${{ inputs.badges-directory }}"
+          
+          if [ "${{ inputs.badge-style }}" == "url" ]; then
+            CMD="$CMD --use-url --github-repo ${{ github.repository }}"
+          fi
+          
+          # Run the script
+          eval $CMD
+          
+          echo "✓ Updated ${{ inputs.readme-path }} with badge references"
+        fi
+      shell: bash
+      if: always()
+
     - name: Commit badges to repository
       run: |
-        if [ "${{ inputs.generate-badges }}" == "true" ]; then
+        if [ "${{ inputs.generate-badges }}" == "true" ] || [ "${{ inputs.update-readme }}" == "true" ]; then
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add "${{ inputs.badges-directory }}/*.svg" || true
+          
+          # Add badge files if they exist
+          if [ "${{ inputs.generate-badges }}" == "true" ]; then
+            git add "${{ inputs.badges-directory }}/*.svg" || true
+          fi
+          
+          # Add README if it was updated
+          if [ "${{ inputs.update-readme }}" == "true" ]; then
+            git add "${{ inputs.readme-path }}" || true
+          fi
+          
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             git commit -m "Update linting badges [skip ci]"
             if git push; then
-              echo "✓ Badges committed and pushed to repository"
+              echo "✓ Changes committed and pushed to repository"
             else
-              echo "⚠ Warning: Failed to push badges. This may be due to insufficient permissions or a merge conflict."
+              echo "⚠ Warning: Failed to push changes. This may be due to insufficient permissions or a merge conflict."
               echo "Please ensure the workflow has write permissions to the repository."
               exit 0
             fi
