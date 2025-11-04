@@ -82,6 +82,28 @@ When `update-readme` is enabled, the action will automatically insert badge refe
 | `readme-path` | Path to README.md file to update with badges | No | `README.md` |
 | `badge-style` | Badge style: 'url' for GitHub URLs or 'path' for relative paths | No | `path` |
 
+## Development
+
+This repository includes comprehensive GitHub workflows for CI/CD:
+
+- **Test Action**: Validates all action features across multiple Python versions
+- **Lint & Test**: Ensures code quality with Pylint, Black, MyPy, and Flake8
+- **Changelog Check**: Requires changelog updates for substantive changes
+- **Release & Marketplace**: Automated semantic versioning and tagging
+- **Security Audit**: Daily security scans with CodeQL, Bandit, and dependency checks
+- **Dependabot**: Automated dependency updates
+
+For detailed workflow documentation, see [.github/WORKFLOWS.md](.github/WORKFLOWS.md).
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Update CHANGELOG.md under the `[Unreleased]` section
+5. Ensure all tests pass
+6. Submit a pull request
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

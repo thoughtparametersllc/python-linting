@@ -1,0 +1,327 @@
+name: Test GitHub Action
+
+# This workflow tests all features of the Python Linting GitHub Action
+# It validates that all action inputs work correctly and that the action
+# properly executes linting tools and badge generation
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'action.yml'
+      - 'update_badges.py'
+      - '.github/workflows/test-action.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'action.yml'
+      - 'update_badges.py'
+      - '.github/workflows/test-action.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  # Test basic linting functionality
+  test-basic-linting:
+    name: Test Basic Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create test Python file
+        run: |
+          mkdir -p test_project
+          cat > test_project/sample.py << 'EOF'
+          """Sample Python file for testing."""
+          
+          def hello_world():
+              """Print hello world."""
+              print("Hello, World!")
+          
+          if __name__ == "__main__":
+              hello_world()
+          EOF
+
+      - name: Run Python Linting (Basic)
+        uses: ./
+        with:
+          python-version: '3.11'
+
+  # Test with custom options
+  test-custom-options:
+    name: Test Custom Linting Options
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create test Python file
+        run: |
+          mkdir -p test_project
+          cat > test_project/sample.py << 'EOF'
+          """Sample Python file for testing."""
+          
+          def hello_world():
+              """Print hello world."""
+              print("Hello, World!")
+          
+          if __name__ == "__main__":
+              hello_world()
+          EOF
+
+      - name: Run Python Linting (Custom Options)
+        uses: ./
+        with:
+          python-version: '3.x'
+          pylint_options: '--max-line-length=100'
+          black_options: '--line-length=100'
+          mypy_options: '--ignore-missing-imports'
+
+  # Test with requirements file
+  test-requirements-file:
+    name: Test With Requirements File
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create test files
+        run: |
+          mkdir -p test_project
+          cat > test_project/sample.py << 'EOF'
+          """Sample Python file with imports."""
+          import sys
+          
+          def main():
+              """Main function."""
+              print(f"Python version: {sys.version}")
+          
+          if __name__ == "__main__":
+              main()
+          EOF
+          
+          cat > requirements.txt << 'EOF'
+          pytest>=7.0.0
+          EOF
+
+      - name: Run Python Linting (With Requirements)
+        uses: ./
+        with:
+          python-version: '3.11'
+          requirements-file: 'requirements.txt'
+
+  # Test badge generation
+  test-badge-generation:
+    name: Test Badge Generation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create test Python file
+        run: |
+          mkdir -p test_project
+          cat > test_project/sample.py << 'EOF'
+          """Sample Python file for testing."""
+          
+          def hello_world():
+              """Print hello world."""
+              print("Hello, World!")
+          
+          if __name__ == "__main__":
+              hello_world()
+          EOF
+
+      - name: Run Python Linting (Badge Generation)
+        uses: ./
+        with:
+          python-version: '3.11'
+          generate-badges: 'true'
+          badges-directory: '.github/test-badges'
+
+      - name: Verify badges were created
+        run: |
+          if [ ! -f .github/test-badges/pylint.svg ]; then
+            echo "Error: pylint badge not created"
+            exit 1
+          fi
+          if [ ! -f .github/test-badges/black.svg ]; then
+            echo "Error: black badge not created"
+            exit 1
+          fi
+          if [ ! -f .github/test-badges/mypy.svg ]; then
+            echo "Error: mypy badge not created"
+            exit 1
+          fi
+          echo "✓ All badges created successfully"
+
+  # Test README update functionality
+  test-readme-update:
+    name: Test README Update
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create test files
+        run: |
+          mkdir -p test_project
+          cat > test_project/sample.py << 'EOF'
+          """Sample Python file for testing."""
+          
+          def hello_world():
+              """Print hello world."""
+              print("Hello, World!")
+          
+          if __name__ == "__main__":
+              hello_world()
+          EOF
+          
+          cat > TEST_README.md << 'EOF'
+          # Test Project
+          
+          This is a test README.
+          EOF
+
+      - name: Run Python Linting (README Update)
+        uses: ./
+        with:
+          python-version: '3.11'
+          generate-badges: 'true'
+          update-readme: 'true'
+          readme-path: 'TEST_README.md'
+          badges-directory: '.github/test-badges'
+          badge-style: 'path'
+
+      - name: Verify README was updated
+        run: |
+          if ! grep -q "linting-badges-start" TEST_README.md; then
+            echo "Error: README not updated with badge markers"
+            exit 1
+          fi
+          if ! grep -q "pylint" TEST_README.md; then
+            echo "Error: README missing pylint badge"
+            exit 1
+          fi
+          echo "✓ README updated successfully"
+          cat TEST_README.md
+
+  # Test update_badges.py script directly
+  test-update-badges-script:
+    name: Test update_badges.py Script
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create test environment
+        run: |
+          mkdir -p test_badges
+          cat > test_readme.md << 'EOF'
+          # Test Project
+          
+          Some content here.
+          EOF
+          
+          # Create dummy badge files
+          echo '<svg></svg>' > test_badges/pylint.svg
+          echo '<svg></svg>' > test_badges/black.svg
+          echo '<svg></svg>' > test_badges/mypy.svg
+
+      - name: Test script with relative paths
+        run: |
+          python3 update_badges.py \
+            --readme test_readme.md \
+            --badges-dir test_badges
+          
+          if ! grep -q "linting-badges-start" test_readme.md; then
+            echo "Error: Script did not update README"
+            exit 1
+          fi
+          echo "✓ Script test (relative paths) passed"
+
+      - name: Test script with GitHub URLs
+        run: |
+          cat > test_readme2.md << 'EOF'
+          # Test Project
+          
+          Some content here.
+          EOF
+          
+          python3 update_badges.py \
+            --readme test_readme2.md \
+            --badges-dir test_badges \
+            --use-url \
+            --github-repo thoughtparametersllc/python-linting
+          
+          if ! grep -q "raw.githubusercontent.com" test_readme2.md; then
+            echo "Error: Script did not use GitHub URLs"
+            exit 1
+          fi
+          echo "✓ Script test (GitHub URLs) passed"
+          cat test_readme2.md
+
+  # Test with different Python versions
+  test-python-versions:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create test Python file
+        run: |
+          mkdir -p test_project
+          cat > test_project/sample.py << 'EOF'
+          """Sample Python file for testing."""
+          
+          def hello_world():
+              """Print hello world."""
+              print("Hello, World!")
+          
+          if __name__ == "__main__":
+              hello_world()
+          EOF
+
+      - name: Run Python Linting (Python ${{ matrix.python-version }})
+        uses: ./
+        with:
+          python-version: ${{ matrix.python-version }}
+
+  # Final summary
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: 
+      - test-basic-linting
+      - test-custom-options
+      - test-requirements-file
+      - test-badge-generation
+      - test-readme-update
+      - test-update-badges-script
+      - test-python-versions
+    steps:
+      - name: All tests passed
+        run: |
+          echo "✅ All GitHub Action feature tests passed successfully!"
+          echo ""
+          echo "Tested features:"
+          echo "  ✓ Basic linting functionality"
+          echo "  ✓ Custom linting options"
+          echo "  ✓ Requirements file handling"
+          echo "  ✓ Badge generation"
+          echo "  ✓ README updates"
+          echo "  ✓ update_badges.py script"
+          echo "  ✓ Multiple Python versions (3.9-3.12)"
