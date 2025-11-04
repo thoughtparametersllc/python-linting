@@ -203,17 +203,18 @@ runs:
         if [ "${{ inputs.update-readme }}" == "true" ]; then
           SCRIPT_DIR="${{ github.action_path }}"
           
-          # Build command arguments
-          CMD="python3 ${SCRIPT_DIR}/update_badges.py"
-          CMD="$CMD --readme ${{ inputs.readme-path }}"
-          CMD="$CMD --badges-dir ${{ inputs.badges-directory }}"
-          
+          # Run the script with properly quoted arguments
           if [ "${{ inputs.badge-style }}" == "url" ]; then
-            CMD="$CMD --use-url --github-repo ${{ github.repository }}"
+            python3 "${SCRIPT_DIR}/update_badges.py" \
+              --readme "${{ inputs.readme-path }}" \
+              --badges-dir "${{ inputs.badges-directory }}" \
+              --use-url \
+              --github-repo "${{ github.repository }}"
+          else
+            python3 "${SCRIPT_DIR}/update_badges.py" \
+              --readme "${{ inputs.readme-path }}" \
+              --badges-dir "${{ inputs.badges-directory }}"
           fi
-          
-          # Run the script
-          eval $CMD
           
           echo "✓ Updated ${{ inputs.readme-path }} with badge references"
         fi
