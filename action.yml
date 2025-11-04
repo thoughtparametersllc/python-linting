@@ -29,6 +29,16 @@ inputs:
     description: The mypy options to pass to mypy.
     required: false
 
+  generate-badges:
+    description: Generate SVG badges for linting results and commit them to the repository.
+    required: false
+    default: 'false'
+
+  badges-directory:
+    description: Directory where badge SVG files will be saved (relative to repository root).
+    required: false
+    default: '.github/badges'
+
 
 runs:
   using: composite
@@ -53,12 +63,13 @@ runs:
       shell: bash
       if: inputs.requirements-file != ''
 
-    - run: pylint ${{ inputs.pylint_options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt
+    - name: Run Pylint
+      run: pylint ${{ inputs.pylint_options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt
       shell: bash
       if: always()
 
-
-    - run: |
+    - name: Report Pylint results
+      run: |
           echo "## Pylint :tada:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
@@ -69,11 +80,13 @@ runs:
       shell: bash
       if: always()
 
-    - run: black --check ${{ inputs.black_options }} . 2>&1 | tee black_output.txt
+    - name: Run Black
+      run: black --check ${{ inputs.black_options }} . 2>&1 | tee black_output.txt
       shell: bash
       if: always()
 
-    - run: |
+    - name: Report Black results
+      run: |
           echo "## Black :tada:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
@@ -84,11 +97,13 @@ runs:
       shell: bash
       if: always()
 
-    - run: mypy ${{ inputs.mypy_options }} . 2>&1 | tee mypy_output.txt
+    - name: Run MyPy
+      run: mypy ${{ inputs.mypy_options }} . 2>&1 | tee mypy_output.txt
       shell: bash
       if: always()
 
-    - run: |
+    - name: Report MyPy results
+      run: |
           echo "## MyPy :tada:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
@@ -99,9 +114,70 @@ runs:
       shell: bash
       if: always()
 
-    
+    - name: Generate SVG badges
+      run: |
+        if [ "${{ inputs.generate-badges }}" == "true" ]; then
+          mkdir -p "${{ inputs.badges-directory }}"
+          
+          # Function to create badge
+          create_badge() {
+            local name=$1
+            local status=$2
+            local color=$3
+            local file=$4
+            
+            cat > "$file" << 'EOF'
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="20">
+          <linearGradient id="b" x2="0" y2="100%">
+            <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+            <stop offset="1" stop-opacity=".1"/>
+          </linearGradient>
+          <clipPath id="a">
+            <rect width="120" height="20" rx="3" fill="#fff"/>
+          </clipPath>
+          <g clip-path="url(#a)">
+            <path fill="#555" d="M0 0h60v20H0z"/>
+            <path fill="COLOR" d="M60 0h60v20H60z"/>
+            <path fill="url(#b)" d="M0 0h120v20H0z"/>
+          </g>
+          <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+            <text x="30" y="15" fill="#010101" fill-opacity=".3">NAME</text>
+            <text x="30" y="14">NAME</text>
+            <text x="90" y="15" fill="#010101" fill-opacity=".3">STATUS</text>
+            <text x="90" y="14">STATUS</text>
+          </g>
+        </svg>
+        EOF
+            sed -i "s/NAME/$name/g" "$file"
+            sed -i "s/STATUS/$status/g" "$file"
+            sed -i "s/COLOR/$color/g" "$file"
+          }
+          
+          # Create badges for each tool
+          create_badge "pylint" "checked" "#4c1" "${{ inputs.badges-directory }}/pylint.svg"
+          create_badge "black" "checked" "#4c1" "${{ inputs.badges-directory }}/black.svg"
+          create_badge "mypy" "checked" "#4c1" "${{ inputs.badges-directory }}/mypy.svg"
+          
+          echo "✓ Generated SVG badges in ${{ inputs.badges-directory }}"
+        fi
+      shell: bash
+      if: always()
 
-
-
+    - name: Commit badges to repository
+      run: |
+        if [ "${{ inputs.generate-badges }}" == "true" ]; then
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add "${{ inputs.badges-directory }}/*.svg" || true
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update linting badges [skip ci]"
+            git push
+            echo "✓ Badges committed and pushed to repository"
+          fi
+        fi
+      shell: bash
+      if: always()
 
 

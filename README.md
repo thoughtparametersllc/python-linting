@@ -11,6 +11,7 @@ GitHub Action to perform Python linting with Black, Pylint, and MyPy.
 - 📦 **Custom requirements** - Install additional dependencies from a requirements file
 - 🔍 **Comprehensive linting** - Run Pylint, Black, and MyPy in a single action
 - 📊 **Detailed reporting** - View results in GitHub Actions summary
+- 🏷️ **SVG badge generation** - Automatically generate and commit linting badges to your repository
 
 ## Usage
 
@@ -32,6 +33,18 @@ GitHub Action to perform Python linting with Black, Pylint, and MyPy.
     pylint_options: '--max-line-length=120'
     black_options: '--line-length=120'
     mypy_options: '--strict'
+    generate-badges: 'true'
+    badges-directory: '.github/badges'
+```
+
+### With Badge Generation
+
+When `generate-badges` is enabled, SVG badges will be automatically generated and committed to your repository. You can then reference them in your README:
+
+```markdown
+![Pylint](.github/badges/pylint.svg)
+![Black](.github/badges/black.svg)
+![MyPy](.github/badges/mypy.svg)
 ```
 
 ## Inputs
@@ -43,6 +56,8 @@ GitHub Action to perform Python linting with Black, Pylint, and MyPy.
 | `pylint_options` | Additional options to pass to pylint | No | `''` |
 | `black_options` | Additional options to pass to black | No | `''` |
 | `mypy_options` | Additional options to pass to mypy | No | `''` |
+| `generate-badges` | Generate and commit SVG badges to the repository | No | `false` |
+| `badges-directory` | Directory where badge SVG files will be saved | No | `.github/badges` |
 
 ## License
 
