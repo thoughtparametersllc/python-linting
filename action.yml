@@ -45,10 +45,10 @@ runs:
     - name: Install additional requirements
       run: |
         if [ -f "${{ inputs.requirements-file }}" ]; then
-          pip3 install -r ${{ inputs.requirements-file }}
+          pip3 install -r "${{ inputs.requirements-file }}"
         else
-          echo "Requirements file not found: ${{ inputs.requirements-file }}"
-          exit 1
+          echo "Warning: Requirements file not found: ${{ inputs.requirements-file }}"
+          echo "Skipping additional requirements installation."
         fi
       shell: bash
       if: inputs.requirements-file != ''
