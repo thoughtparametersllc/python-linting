@@ -17,6 +17,8 @@ jobs:
   check-changelog:
     name: Check Changelog
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       has_unreleased: ${{ steps.check.outputs.has_unreleased }}
       release_notes: ${{ steps.extract.outputs.release_notes }}
@@ -61,6 +63,8 @@ jobs:
   determine-version:
     name: Determine Next Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: check-changelog
     if: needs.check-changelog.outputs.has_unreleased == 'true' || github.event_name == 'workflow_dispatch'
     outputs:
@@ -210,6 +214,8 @@ jobs:
   marketplace-submission:
     name: Marketplace Submission Info
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: create-release
     steps:
       - name: Marketplace submission info
@@ -235,6 +241,8 @@ jobs:
   workflow-summary:
     name: Release Summary
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs:
       - create-release
       - marketplace-submission

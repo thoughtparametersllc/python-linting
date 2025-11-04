@@ -12,6 +12,8 @@ jobs:
   check-changelog:
     name: Verify Changelog Updated
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

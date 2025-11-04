@@ -14,6 +14,8 @@ jobs:
   lint-python:
     name: Lint Python Files
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -54,6 +56,8 @@ jobs:
   lint-yaml:
     name: Lint YAML Files
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -82,6 +86,8 @@ jobs:
   test-update-badges:
     name: Test update_badges.py
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -127,6 +133,8 @@ jobs:
   shellcheck:
     name: Shellcheck
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -141,6 +149,8 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -172,6 +182,8 @@ jobs:
   test-summary:
     name: All Checks Complete
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: 
       - lint-python
       - lint-yaml

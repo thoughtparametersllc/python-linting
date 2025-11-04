@@ -24,6 +24,8 @@ jobs:
   test-basic-linting:
     name: Test Basic Linting
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -51,6 +53,8 @@ jobs:
   test-custom-options:
     name: Test Custom Linting Options
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -81,6 +85,8 @@ jobs:
   test-requirements-file:
     name: Test With Requirements File
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -115,7 +121,7 @@ jobs:
     name: Test Badge Generation
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -162,7 +168,7 @@ jobs:
     name: Test README Update
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -214,6 +220,8 @@ jobs:
   test-update-badges-script:
     name: Test update_badges.py Script
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -274,6 +282,8 @@ jobs:
   test-python-versions:
     name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12']
@@ -304,6 +314,8 @@ jobs:
   test-summary:
     name: Test Summary
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: 
       - test-basic-linting
       - test-custom-options
