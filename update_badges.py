@@ -154,11 +154,8 @@ def update_readme_with_badges(
         return False
     
     # Insert badges based on position
-    if badge_position == 'after-title':
-        updated_lines = insert_badges_after_title(lines, badges_md)
-    else:
-        # Default behavior: after title
-        updated_lines = insert_badges_after_title(lines, badges_md)
+    # Currently only 'after-title' is supported, but this can be extended
+    updated_lines = insert_badges_after_title(lines, badges_md)
     
     # Write updated README
     with open(readme_path, 'w', encoding='utf-8') as f:
