@@ -64,9 +64,12 @@ runs:
       if: inputs.requirements-file != ''
 
     - name: Run Pylint
-      run: pylint ${{ inputs.pylint_options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt
+      run: |
+        pylint ${{ inputs.pylint_options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt
+        echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_ENV
       shell: bash
       if: always()
+      continue-on-error: true
 
     - name: Report Pylint results
       run: |
@@ -81,9 +84,12 @@ runs:
       if: always()
 
     - name: Run Black
-      run: black --check ${{ inputs.black_options }} . 2>&1 | tee black_output.txt
+      run: |
+        black --check ${{ inputs.black_options }} . 2>&1 | tee black_output.txt
+        echo "BLACK_EXIT_CODE=$?" >> $GITHUB_ENV
       shell: bash
       if: always()
+      continue-on-error: true
 
     - name: Report Black results
       run: |
@@ -98,9 +104,12 @@ runs:
       if: always()
 
     - name: Run MyPy
-      run: mypy ${{ inputs.mypy_options }} . 2>&1 | tee mypy_output.txt
+      run: |
+        mypy ${{ inputs.mypy_options }} . 2>&1 | tee mypy_output.txt
+        echo "MYPY_EXIT_CODE=$?" >> $GITHUB_ENV
       shell: bash
       if: always()
+      continue-on-error: true
 
     - name: Report MyPy results
       run: |
@@ -148,15 +157,26 @@ runs:
           </g>
         </svg>
         EOF
-            sed -i "s/NAME/$name/g" "$file"
-            sed -i "s/STATUS/$status/g" "$file"
-            sed -i "s/COLOR/$color/g" "$file"
+            sed -i "s/NAME/$name/g; s/STATUS/$status/g; s/COLOR/$color/g" "$file"
           }
           
-          # Create badges for each tool
-          create_badge "pylint" "checked" "#4c1" "${{ inputs.badges-directory }}/pylint.svg"
-          create_badge "black" "checked" "#4c1" "${{ inputs.badges-directory }}/black.svg"
-          create_badge "mypy" "checked" "#4c1" "${{ inputs.badges-directory }}/mypy.svg"
+          # Determine badge status based on exit codes
+          PYLINT_STATUS="passing"
+          PYLINT_COLOR="#4c1"
+          [ "${PYLINT_EXIT_CODE:-0}" != "0" ] && PYLINT_STATUS="failing" && PYLINT_COLOR="#e05d44"
+          
+          BLACK_STATUS="passing"
+          BLACK_COLOR="#4c1"
+          [ "${BLACK_EXIT_CODE:-0}" != "0" ] && BLACK_STATUS="failing" && BLACK_COLOR="#e05d44"
+          
+          MYPY_STATUS="passing"
+          MYPY_COLOR="#4c1"
+          [ "${MYPY_EXIT_CODE:-0}" != "0" ] && MYPY_STATUS="failing" && MYPY_COLOR="#e05d44"
+          
+          # Create badges for each tool with actual status
+          create_badge "pylint" "$PYLINT_STATUS" "$PYLINT_COLOR" "${{ inputs.badges-directory }}/pylint.svg"
+          create_badge "black" "$BLACK_STATUS" "$BLACK_COLOR" "${{ inputs.badges-directory }}/black.svg"
+          create_badge "mypy" "$MYPY_STATUS" "$MYPY_COLOR" "${{ inputs.badges-directory }}/mypy.svg"
           
           echo "✓ Generated SVG badges in ${{ inputs.badges-directory }}"
         fi
@@ -173,8 +193,13 @@ runs:
             echo "No changes to commit"
           else
             git commit -m "Update linting badges [skip ci]"
-            git push
-            echo "✓ Badges committed and pushed to repository"
+            if git push; then
+              echo "✓ Badges committed and pushed to repository"
+            else
+              echo "⚠ Warning: Failed to push badges. This may be due to insufficient permissions or a merge conflict."
+              echo "Please ensure the workflow has write permissions to the repository."
+              exit 0
+            fi
           fi
         fi
       shell: bash
