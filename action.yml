@@ -279,7 +279,7 @@ runs:
           echo "✓ MyPy passed"
         fi
         
-        if [ "$FAILED" == "1" ]; then
+        if [ "$FAILED" -eq 1 ]; then
           echo ""
           echo "❌ Linting failed. Please fix the issues above."
           exit 1
