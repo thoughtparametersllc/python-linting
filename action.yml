@@ -81,7 +81,7 @@ runs:
     - name: Run Pylint
       run: |
         pylint ${{ inputs.pylint_options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt
-        echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_ENV
+        echo "PYLINT_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_ENV
       shell: bash
       if: always()
       continue-on-error: true
@@ -101,7 +101,7 @@ runs:
     - name: Run Black
       run: |
         black --check ${{ inputs.black_options }} . 2>&1 | tee black_output.txt
-        echo "BLACK_EXIT_CODE=$?" >> $GITHUB_ENV
+        echo "BLACK_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_ENV
       shell: bash
       if: always()
       continue-on-error: true
@@ -121,7 +121,7 @@ runs:
     - name: Run MyPy
       run: |
         mypy ${{ inputs.mypy_options }} . 2>&1 | tee mypy_output.txt
-        echo "MYPY_EXIT_CODE=$?" >> $GITHUB_ENV
+        echo "MYPY_EXIT_CODE=${PIPESTATUS[0]}" >> $GITHUB_ENV
       shell: bash
       if: always()
       continue-on-error: true
