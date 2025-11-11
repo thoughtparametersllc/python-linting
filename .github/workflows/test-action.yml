@@ -310,6 +310,67 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+  # Test that action fails when linting fails
+  test-failure-behavior:
+    name: Test Failure Behavior
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Need write to test badge commits
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Create badly formatted Python file
+        run: |
+          mkdir -p test_project
+          cat > test_project/bad_code.py << 'EOF'
+          """Badly formatted Python file to test failure behavior."""
+          
+          def badly_formatted(  ):
+              x=1+2
+              y  =  3  +  4
+              return x+y
+          
+          if __name__ == "__main__":
+              badly_formatted()
+          EOF
+
+      - name: Run Python Linting (Should Fail)
+        id: linting
+        uses: ./
+        with:
+          python-version: '3.11'
+          black_options: '--check'
+          generate-badges: 'true'
+          badges-directory: '.github/test-failure-badges'
+          update-readme: 'false'
+        continue-on-error: true
+
+      - name: Verify action failed
+        run: |
+          if [ "${{ steps.linting.outcome }}" != "failure" ]; then
+            echo "❌ Error: Action should have failed but didn't"
+            echo "Outcome was: ${{ steps.linting.outcome }}"
+            exit 1
+          fi
+          echo "✓ Action correctly failed when linting failed"
+
+      - name: Verify badges were still generated
+        run: |
+          if [ ! -f .github/test-failure-badges/black.svg ]; then
+            echo "❌ Error: Badges not generated even though they should always be created"
+            exit 1
+          fi
+          echo "✓ Badges were generated even though linting failed"
+          
+          # Verify the badge shows failure status (contains 'failing' text)
+          if ! grep -q "failing" .github/test-failure-badges/black.svg; then
+            echo "❌ Error: Badge does not indicate failure"
+            cat .github/test-failure-badges/black.svg
+            exit 1
+          fi
+          echo "✓ Badge correctly shows failing status"
+
   # Final summary
   test-summary:
     name: Test Summary
@@ -324,6 +385,7 @@ jobs:
       - test-readme-update
       - test-update-badges-script
       - test-python-versions
+      - test-failure-behavior
     steps:
       - name: All tests passed
         run: |
@@ -337,3 +399,5 @@ jobs:
           echo "  ✓ README updates"
           echo "  ✓ update_badges.py script"
           echo "  ✓ Multiple Python versions (3.9-3.12)"
+          echo "  ✓ Failure behavior (action fails when linting fails)"
+          echo "  ✓ Badge generation on failure"

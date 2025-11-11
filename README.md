@@ -67,6 +67,23 @@ When `update-readme` is enabled, the action will automatically insert badge refe
 ![MyPy](.github/badges/mypy.svg)
 ```
 
+## Behavior
+
+### Failure Handling
+
+The action is designed to provide comprehensive linting feedback while maintaining proper CI/CD semantics:
+
+1. **All linting tools always run**: Even if one tool fails, the others will still execute to provide complete feedback
+2. **Badges and README are always updated**: Badge generation and README updates happen regardless of linting results, ensuring status badges accurately reflect the current state
+3. **The action fails if any linting fails**: After all tools run and badges are updated, the action will fail with a non-zero exit code if any linting tool reported issues
+4. **Workflow stops on failure**: When the action fails, subsequent steps in your workflow will not execute (unless they use `if: always()` or `if: failure()`)
+
+This ensures that:
+- You get complete linting feedback in one run
+- Status badges are always up-to-date
+- Your CI/CD pipeline correctly reports failures
+- Failed linting prevents merges when using branch protection rules
+
 ## Inputs
 
 | Input | Description | Required | Default |

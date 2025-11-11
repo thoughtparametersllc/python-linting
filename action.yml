@@ -253,4 +253,41 @@ runs:
       shell: bash
       if: always()
 
+    - name: Check linting results and fail if needed
+      run: |
+        echo "Checking linting results..."
+        FAILED=0
+        
+        if [ "${PYLINT_EXIT_CODE:-0}" != "0" ]; then
+          echo "❌ Pylint failed with exit code ${PYLINT_EXIT_CODE}"
+          FAILED=1
+        else
+          echo "✓ Pylint passed"
+        fi
+        
+        if [ "${BLACK_EXIT_CODE:-0}" != "0" ]; then
+          echo "❌ Black failed with exit code ${BLACK_EXIT_CODE}"
+          FAILED=1
+        else
+          echo "✓ Black passed"
+        fi
+        
+        if [ "${MYPY_EXIT_CODE:-0}" != "0" ]; then
+          echo "❌ MyPy failed with exit code ${MYPY_EXIT_CODE}"
+          FAILED=1
+        else
+          echo "✓ MyPy passed"
+        fi
+        
+        if [ "$FAILED" == "1" ]; then
+          echo ""
+          echo "❌ Linting failed. Please fix the issues above."
+          exit 1
+        else
+          echo ""
+          echo "✅ All linting checks passed!"
+        fi
+      shell: bash
+      if: always()
+
 
