@@ -28,17 +28,11 @@ inputs:
   mypy_options:
     description: The mypy options to pass to mypy.
     required: false
-
-  readme-path:
-    description: Path to README.md file to update with badges.
+    
+  badge-directory:
+    description: Directory to save the generated SVG badges. Defaults to .github/badges.
     required: false
-    default: 'README.md'
-
-  badge-style:
-    description: Badge style - 'url' for GitHub URLs or 'path' for relative paths.
-    required: false
-    default: 'path'
-
+    default: '.github/badges'
 
 runs:
   using: composite
@@ -49,30 +43,61 @@ runs:
         python-version: ${{ inputs.python-version }}
 
     - name: Install linting tools
-      run: pip3 install pylint black mypy
+      run: |
+        echo "::debug file=action.yml,line=51::Installing pylint, black, and mypy."
+        pip3 install pylint black mypy
+        if [ $? -eq 0 ]; then
+          echo "::notice file=action.yml,line=54::Successfully installed pylint, black, and mypy."
+        else
+          echo "::error file=action.yml,line=55::Failed to install pylint, black, and mypy."
+          exit 1
+        fi
       shell: bash
 
     - name: Install additional requirements
       run: |
+        echo "::debug file=action.yml,line=60::Installing additional requirements from ${{ inputs.requirements-file }}"
         if [ -f "${{ inputs.requirements-file }}" ]; then
           pip3 install -r "${{ inputs.requirements-file }}"
+          if [ $? -eq 0 ]; then
+            echo "::notice file=action.yml,line=62::Successfully installed additional requirements from ${{ inputs.requirements-file }}"
+          else
+            echo "::error file=action.yml,line=63::Failed to install additional requirements from ${{ inputs.requirements-file }}"
+            exit 1
+          fi
         else
-          echo "Warning: Requirements file not found: ${{ inputs.requirements-file }}"
-          echo "Skipping additional requirements installation."
+          echo "::warning file=action.yml,line=63::Requirements file not found: ${{ inputs.requirements-file }}"
+          echo "::notice file=action.yml,line=64::Skipping additional requirements installation."
         fi
       shell: bash
       if: inputs.requirements-file != ''
 
     - name: Run Pylint
       run: |
+        echo "::debug file=action.yml,line=67::Running Pylint with options: ${{ inputs.pylint_options }}"
         pylint ${{ inputs.pylint_options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt
         echo "PYLINT_EXIT_CODE=$?" >> $GITHUB_ENV
+        echo "::debug file=action.yml,line=71::Pylint completed with exit code ${{ env.PYLINT_EXIT_CODE }}"
       shell: bash
       if: always()
 
     - name: Report Pylint results
       run: |
-          echo "## Pylint :tada:" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ env.PYLINT_EXIT_CODE }}" == "0" ]; then
+            if [ -z "$(cat pylint_output.txt)" ]; then
+              echo "::notice file=action.yml,line=70::No linting issues found."
+              echo "No linting issues found." > pylint_output.txt
+            fi
+          else
+            if [ -z "$(cat pylint_output.txt)" ]; then
+              echo "::warning file=action.yml,line=78::No output from pylint, but exit code indicates issues."
+              echo "No output from pylint, but exit code indicates issues." > pylint_output.txt
+            else
+              echo "::error file=action.yml,line=82::Linting issues found."
+            fi
+          fi
+          echo "::debug file=action.yml,line=75::Reporting Pylint results."
+          echo "## Pylint Results :shirt:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
           cat pylint_output.txt >> $GITHUB_STEP_SUMMARY
@@ -84,46 +109,87 @@ runs:
 
     - name: Run Black
       run: |
+        echo "::debug file=action.yml,line=88::Running Black with options: ${{ inputs.black_options }}"
         black --check ${{ inputs.black_options }} . 2>&1 | tee black_output.txt
         echo "BLACK_EXIT_CODE=$?" >> $GITHUB_ENV
+        echo "::debug file=action.yml,line=92::Black completed with exit code ${{ env.BLACK_EXIT_CODE }}"
       shell: bash
       if: always()
 
     - name: Report Black results
       run: |
-          echo "## Black :tada:" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ env.BLACK_EXIT_CODE }}" == "0" ]; then
+            if [ -z "$(cat black_output.txt)" ]; then
+              echo "::notice file=action.yml,line=97::No code formatting issues found."
+              echo "No code formatting issues found." > black_output.txt
+            else
+              echo "::notice file=action.yml,line=100::Code is properly formatted."
+            fi
+          else
+            if [ -z "$(cat black_output.txt)" ]; then
+              echo "::warning file=action.yml,line=105::No output from black, but exit code indicates issues."
+              echo "No output from black, but exit code indicates issues." > black_output.txt
+            else
+              echo "::error file=action.yml,line=93::Code formatting issues found."
+            fi
+          fi
+          echo "::debug file=action.yml,line=90::Reporting Black results."
+          echo "## Black Results :art:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
           cat black_output.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "::debug file=action.yml,line=100::Removing temporary black output file."
           rm -f black_output.txt
       shell: bash
       if: always()
 
     - name: Run MyPy
       run: |
+        echo "::debug file=action.yml,line=106::Running MyPy with options: ${{ inputs.mypy_options }}"
         mypy ${{ inputs.mypy_options }} . 2>&1 | tee mypy_output.txt
         echo "MYPY_EXIT_CODE=$?" >> $GITHUB_ENV
+        echo "::debug file=action.yml,line=110::MyPy completed with exit code ${{ env.MYPY_EXIT_CODE }}"
       shell: bash
       if: always()
 
     - name: Report MyPy results
       run: |
-          echo "## MyPy :tada:" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ env.MYPY_EXIT_CODE }}" == "0" ]; then
+            if [ -z "$(cat mypy_output.txt)" ]; then
+              echo "::notice file=action.yml,line=115::No type checking issues found."
+            else
+              echo "::warning file=action.yml,line=145::Mypy output present despite zero exit code."
+              echo "Mypy output present despite zero exit code." > mypy_output.txt
+            fi
+            echo "::notice file=action.yml,line=120::All type checks passed."
+          else
+            echo "::error file=action.yml,line=150::Type checking issues found."
+            if [ -z "$(cat mypy_output.txt)" ]; then
+              echo "::warning file=action.yml,line=153::No output from mypy, but exit code indicates issues."
+            fi
+          fi
+          echo "## MyPy Results :hammer:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```text' >> $GITHUB_STEP_SUMMARY
           cat mypy_output.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "::debug file=action.yml,line=138::Removing temporary mypy output file."
           rm -f mypy_output.txt
       shell: bash
       if: always()
 
     - name: Generate SVG badges
       run: |
-        mkdir -p .github/badges
-        
+        echo "::debug file=action.yml,line=167::Creating badges directory ${{ inputs.badge-directory }}/ if it does not exist."
+        if [ -d "${{ inputs.badge-directory }}" ]; then
+          echo "::debug file=action.yml,line=170::Badge directory already exists."
+        else
+          mkdir -p "${{ inputs.badge-directory }}"
+        fi
+
         # Function to create badge
         create_badge() {
           local name=$1
@@ -169,39 +235,49 @@ runs:
           MYPY_COLOR="#4c1"
           [ "${MYPY_EXIT_CODE:-1}" != "0" ] && MYPY_STATUS="failing" && MYPY_COLOR="#e05d44"
           
+          echo "::debug file=action.yml,line=189::Badge statuses - Pylint: $PYLINT_STATUS, Black: $BLACK_STATUS, MyPy: $MYPY_STATUS"
+
           # Create badges for each tool with actual status
-          create_badge "pylint" "$PYLINT_STATUS" "$PYLINT_COLOR" ".github/badges/pylint.svg"
-          create_badge "black" "$BLACK_STATUS" "$BLACK_COLOR" ".github/badges/black.svg"
-          create_badge "mypy" "$MYPY_STATUS" "$MYPY_COLOR" ".github/badges/mypy.svg"
+          create_badge "pylint" "$PYLINT_STATUS" "$PYLINT_COLOR" "${{ inputs.badge-directory }}/pylint.svg"
+          create_badge "black" "$BLACK_STATUS" "$BLACK_COLOR" "${{ inputs.badge-directory }}/black.svg"
+          create_badge "mypy" "$MYPY_STATUS" "$MYPY_COLOR" "${{ inputs.badge-directory }}/mypy.svg"
           
-          echo "✓ Generated SVG badges in .github/badges/"
+          echo "::notice file=action.yml,line=195::Generated SVG badges in ${{ inputs.badge-directory }}/"
         fi
       shell: bash
       if: always()
 
     - name: Commit badges to repository
       run: |
+        echo "::debug file=action.yml,line=204::Attempting to commit badge files to repository."
+        echo "::notice file=action.yml,line=207::Setting git user email."
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        echo "::notice file=action.yml,line=205::Configuring git user name."
         git config --local user.name "github-actions[bot]"
         
+        echo "::debug file=action.yml,line=210::Fetching latest changes from remote and rebasing."
         git pull --rebase origin "${{ github.ref_name }}"
 
+        echo "::notice file=action.yml,line=213::Adding badge files to git staging area."
         # Add badge files if they exist
-        if [ -d ".github/badges" ]; then
-          git add .github/badges/pylint.svg || true
-          git add .github/badges/black.svg || true
-          git add .github/badges/mypy.svg || true
+        if [ -d "${{ inputs.badge-directory }}" ]; then
+          echo "::debug file=action.yml,line=216::Badge directory exists. Adding badge files."
+          git add "${{ inputs.badge-directory }}/pylint.svg" || true
+          git add "${{ inputs.badge-directory }}/black.svg" || true
+          git add "${{ inputs.badge-directory }}/mypy.svg" || true
         fi
         
         if git diff --staged --quiet; then
-          echo "No changes to commit"
+          echo "::notice file=action.yml,line=222::No changes to commit"
         else
+          echo "::notice file=action.yml,line=224::Committing and pushing badge changes to repository."
           git commit -m "Update linting badges [skip ci]"
           if git push; then
-            echo "✓ Changes committed and pushed to repository"
+            echo "::notice file=action.yml,line=227::Changes committed and pushed to repository.
           else
-            echo "⚠ Warning: Failed to push changes. This may be due to insufficient permissions or a merge conflict."
-            echo "Please ensure the workflow has write permissions to the repository."
+            echo "::warning file=action.yml,line=230::Failed to push changes to repository."
+            echo "::notice file=action.yml,line=231::This may be due to insufficient permissions or a merge conflict."
+            echo ""
             exit 0
           fi
       shell: bash
