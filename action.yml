@@ -28,7 +28,7 @@ inputs:
   mypy_options:
     description: The mypy options to pass to mypy.
     required: false
-    
+
   badge-directory:
     description: Directory to save the generated SVG badges. Defaults to .github/badges.
     required: false
@@ -83,7 +83,7 @@ runs:
 
     - name: Report Pylint results
       run: |
-          if [ "${{ env.PYLINT_EXIT_CODE }}" == "0" ]; then
+          if [ "$PYLINT_EXIT_CODE" == "0" ]; then
             if [ -z "$(cat pylint_output.txt)" ]; then
               echo "::notice file=action.yml,line=70::No linting issues found."
               echo "No linting issues found." > pylint_output.txt
@@ -118,7 +118,7 @@ runs:
 
     - name: Report Black results
       run: |
-          if [ "${{ env.BLACK_EXIT_CODE }}" == "0" ]; then
+          if [ "$BLACK_EXIT_CODE" == "0" ]; then
             if [ -z "$(cat black_output.txt)" ]; then
               echo "::notice file=action.yml,line=97::No code formatting issues found."
               echo "No code formatting issues found." > black_output.txt
@@ -156,7 +156,7 @@ runs:
 
     - name: Report MyPy results
       run: |
-          if [ "${{ env.MYPY_EXIT_CODE }}" == "0" ]; then
+          if [ "$MYPY_EXIT_CODE" == "0" ]; then
             if [ -z "$(cat mypy_output.txt)" ]; then
               echo "::notice file=action.yml,line=115::No type checking issues found."
             else
