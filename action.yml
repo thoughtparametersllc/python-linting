@@ -261,9 +261,11 @@ runs:
         echo "::notice file=action.yml,line=213::Adding badge files to git staging area."
         # Add badge files if they exist
         echo "::debug file=action.yml,line=216::Adding badge files."
-        git add "${{ inputs.badge-directory }}/pylint.svg" || true
-        git add "${{ inputs.badge-directory }}/black.svg" || true
-        git add "${{ inputs.badge-directory }}/mypy.svg" || true
+        git add "${{ inputs.badge-directory }}/pylint.svg"
+        git add "${{ inputs.badge-directory }}/black.svg"
+        git add "${{ inputs.badge-directory }}/mypy.svg"
+
+        echo "::debug file=action.yml,line=220::Checking for changes to commit."
         
         if git diff --staged --quiet; then
           echo "::notice file=action.yml,line=222::No changes to commit"
