@@ -222,28 +222,27 @@ runs:
             sed -i "s/NAME/$name/g; s/STATUS/$status/g; s/COLOR/$color/g" "$file"
           }
           
-          # Determine badge status based on exit codes
-          PYLINT_STATUS="passing"
-          PYLINT_COLOR="#4c1"
-          [ "${PYLINT_EXIT_CODE:-1}" != "0" ] && PYLINT_STATUS="failing" && PYLINT_COLOR="#e05d44"
-          
-          BLACK_STATUS="passing"
-          BLACK_COLOR="#4c1"
-          [ "${BLACK_EXIT_CODE:-1}" != "0" ] && BLACK_STATUS="failing" && BLACK_COLOR="#e05d44"
-          
-          MYPY_STATUS="passing"
-          MYPY_COLOR="#4c1"
-          [ "${MYPY_EXIT_CODE:-1}" != "0" ] && MYPY_STATUS="failing" && MYPY_COLOR="#e05d44"
-          
-          echo "::debug file=action.yml,line=189::Badge statuses - Pylint: $PYLINT_STATUS, Black: $BLACK_STATUS, MyPy: $MYPY_STATUS"
+        # Determine badge status based on exit codes
+        PYLINT_STATUS="passing"
+        PYLINT_COLOR="#4c1"
+        [ "${PYLINT_EXIT_CODE:-1}" != "0" ] && PYLINT_STATUS="failing" && PYLINT_COLOR="#e05d44"
+        
+        BLACK_STATUS="passing"
+        BLACK_COLOR="#4c1"
+        [ "${BLACK_EXIT_CODE:-1}" != "0" ] && BLACK_STATUS="failing" && BLACK_COLOR="#e05d44"
+        
+        MYPY_STATUS="passing"
+        MYPY_COLOR="#4c1"
+        [ "${MYPY_EXIT_CODE:-1}" != "0" ] && MYPY_STATUS="failing" && MYPY_COLOR="#e05d44"
+        
+        echo "::debug file=action.yml,line=189::Badge statuses - Pylint: $PYLINT_STATUS, Black: $BLACK_STATUS, MyPy: $MYPY_STATUS"
 
-          # Create badges for each tool with actual status
-          create_badge "pylint" "$PYLINT_STATUS" "$PYLINT_COLOR" "${{ inputs.badge-directory }}/pylint.svg"
-          create_badge "black" "$BLACK_STATUS" "$BLACK_COLOR" "${{ inputs.badge-directory }}/black.svg"
-          create_badge "mypy" "$MYPY_STATUS" "$MYPY_COLOR" "${{ inputs.badge-directory }}/mypy.svg"
-          
-          echo "::notice file=action.yml,line=195::Generated SVG badges in ${{ inputs.badge-directory }}/"
-        fi
+        # Create badges for each tool with actual status
+        create_badge "pylint" "$PYLINT_STATUS" "$PYLINT_COLOR" "${{ inputs.badge-directory }}/pylint.svg"
+        create_badge "black" "$BLACK_STATUS" "$BLACK_COLOR" "${{ inputs.badge-directory }}/black.svg"
+        create_badge "mypy" "$MYPY_STATUS" "$MYPY_COLOR" "${{ inputs.badge-directory }}/mypy.svg"
+        
+        echo "::notice file=action.yml,line=195::Generated SVG badges in ${{ inputs.badge-directory }}/"
       shell: bash
       if: always()
 
@@ -258,17 +257,22 @@ runs:
         echo "::debug file=action.yml,line=210::Fetching latest changes from remote and rebasing."
         git pull --rebase origin "${{ github.ref_name }}"
 
-        echo "::notice file=action.yml,line=213::Adding badge files to git staging area."
-        # Add badge files if they exist
         echo "::debug file=action.yml,line=216::Adding badge files."
+        if [ ! -d "${{ inputs.badge-directory }}" ]; then
+          echo "::warning file=action.yml,line=215::Badge directory ${{ inputs.badge-directory }} does not exist. Skipping badge commit."
+          exit 0
+        fi
+
         echo "::debug file=action.yml,line=217::Adding ${{ inputs.badge-directory }}/pylint.svg"
         git add "${{ inputs.badge-directory }}/pylint.svg"
+        
         echo "::debug file=action.yml,line=218::Adding ${{ inputs.badge-directory }}/black.svg"
         git add "${{ inputs.badge-directory }}/black.svg"
+        
         echo "::debug file=action.yml,line=219::Adding ${{ inputs.badge-directory }}/mypy.svg"
         git add "${{ inputs.badge-directory }}/mypy.svg"
+        
         echo "::notice file=action.yml,line=219::Badge files added to staging area."
-
         echo "::debug file=action.yml,line=220::Checking for changes to commit."
         
         if git diff --staged --quiet; then
