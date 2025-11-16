@@ -248,25 +248,28 @@ runs:
 
     - name: Commit badges to repository
       run: |
-        echo "::debug file=action.yml,line=204::Attempting to commit badge files to repository."
-        echo "::notice file=action.yml,line=207::Setting git user email."
+        echo "::debug file=action.yml,line=252::Setting git user email." 
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        echo "::notice file=action.yml,line=205::Configuring git user name."
-        git config --local user.name "github-actions[bot]"
-        
-        echo "::debug file=action.yml,line=210::Fetching latest changes from remote and rebasing."
-        git pull --rebase origin "${{ github.ref_name }}"
+        if [ $? -ne 0 ]; then
+          echo "::warning file=action.yml,line=252::Failed to set git user email."
+        fi
 
-        echo "::debug file=action.yml,line=216::Adding badge files."
+        echo "::debug file=action.yml,line=258::Configuring git user name."
+        git config --local user.name "github-actions[bot]"
+        if [ $? -ne 0 ]; then
+          echo "::warning file=action.yml,line=258::Failed to set git user name."
+        fi
+
+        echo "::debug file=action.yml,line=264::Checking if badge directory ${{ inputs.badge-directory }} exists."
         if [ ! -d "${{ inputs.badge-directory }}" ]; then
-          echo "::warning file=action.yml,line=215::Badge directory ${{ inputs.badge-directory }} does not exist. Skipping badge commit."
+          echo "::warning file=action.yml,line=264::Badge directory ${{ inputs.badge-directory }} does not exist. Skipping badge commit."
           exit 0
         fi
 
-        echo "::debug file=action.yml,line=267::Adding ${{ inputs.badge-directory }}/pylint.svg"
+        echo "::debug file=action.yml,line=270::Adding ${{ inputs.badge-directory }}/pylint.svg"
         git add "${{ inputs.badge-directory }}/pylint.svg"
         if [ $? -ne 0 ]; then
-          echo "::warning file=action.yml,line=268::Failed to add pylint badge. Directory may not exist."
+          echo "::warning file=action.yml,line=270::Failed to add pylint badge. Directory may not exist."
         fi
         
         echo "::debug file=action.yml,line=270::Adding ${{ inputs.badge-directory }}/black.svg"
@@ -286,7 +289,7 @@ runs:
         echo "::debug file=action.yml,line=288::Checking for changes to commit."
         
         git diff --staged --quiet
-        
+
         if [ $? -eq 0 ]; then
           echo "::notice file=action.yml,line=277::No changes to commit."
           exit 0
