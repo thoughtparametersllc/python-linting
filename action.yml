@@ -261,9 +261,13 @@ runs:
         echo "::notice file=action.yml,line=213::Adding badge files to git staging area."
         # Add badge files if they exist
         echo "::debug file=action.yml,line=216::Adding badge files."
+        echo "::debug file=action.yml,line=217::Adding ${{ inputs.badge-directory }}/pylint.svg"
         git add "${{ inputs.badge-directory }}/pylint.svg"
+        echo "::debug file=action.yml,line=218::Adding ${{ inputs.badge-directory }}/black.svg"
         git add "${{ inputs.badge-directory }}/black.svg"
+        echo "::debug file=action.yml,line=219::Adding ${{ inputs.badge-directory }}/mypy.svg"
         git add "${{ inputs.badge-directory }}/mypy.svg"
+        echo "::notice file=action.yml,line=219::Badge files added to staging area."
 
         echo "::debug file=action.yml,line=220::Checking for changes to commit."
         
