@@ -332,13 +332,15 @@ runs:
 
         if [ $? -eq 0 ]; then
           echo "::notice file=action.yml,line=310::Changes committed and pushed to repository."
+          exit 0
         else
           echo "::warning file=action.yml,line=310::Failed to push changes to repository."
           echo "::notice file=action.yml,line=312::This may be due to insufficient permissions or a merge conflict."
           echo ""
-          exit 0
+          exit 1
         fi
       shell: bash
       if: always()
+      continue-on-error: true
 
 
