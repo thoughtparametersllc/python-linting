@@ -60,7 +60,7 @@ runs:
 
     - name: Install Additional Requirements
       id: install-requirements
-      if: inputs.requirements-file != '' and steps.setup-python.outcome == 'success'
+      if: inputs.requirements-file != '' && steps.setup-python.outcome == 'success'
       run: |
         echo "::notice file=action.yml,line=60::Installing additional requirements from ${{ inputs.requirements-file }}"
         if [[ test -f "${{ inputs.requirements-file }}" ]]; then
@@ -73,7 +73,7 @@ runs:
       continue-on-error: true
 
     - name: Generate Requirements Failure Summary
-      if: steps.setup-python.outcome == 'success' and steps.install-requirements.outcome == 'failure'
+      if: steps.setup-python.outcome == 'success' && steps.install-requirements.outcome == 'failure'
       run: |
         echo "::notice file=action.yml,line=73::Creating Requirements Installation Failure Summary in GitHub Step Summary."
 
@@ -121,7 +121,7 @@ runs:
 
     - name: Run Pylint
       id: run-pylint
-      if: steps.install-linting-tools.outcome == 'success' and always()
+      if: steps.install-linting-tools.outcome == 'success' && always()
       run: |
         if [[ -z "${{ inputs.pylint_options }}" ]]; then
           echo "::notice file=action.yml,line=66::No Pylint options provided, using default."
@@ -182,7 +182,7 @@ runs:
 
     - name: Run Black
       id: run-black
-      if: steps.install-linting-tools.outcome == 'success' and always()
+      if: steps.install-linting-tools.outcome == 'success' && always()
       run: |
         if [[ -z "${{ inputs.black_options }}" ]]; then
           echo "::notice file=action.yml,line=88::No Black options provided, using default."
@@ -244,7 +244,7 @@ runs:
 
     - name: Run MyPy
       id: run-mypy
-      if: steps.install-linting-tools.outcome == 'success' and always()
+      if: steps.install-linting-tools.outcome == 'success' && always()
       run: |
         if [ -z "${{ inputs.mypy_options }}" ]; then
           echo "::notice file=action.yml,line=105::No MyPy options provided, using default."
@@ -305,7 +305,7 @@ runs:
 
     - name: Generate SVG Badges
       id: generate-badges
-      if: steps.install-linting-tools.outcome == 'success' and always()
+      if: steps.install-linting-tools.outcome == 'success' && always()
       run: |
         echo "::notice file=action.yml,line=167::Creating badges directory ${{ inputs.badge-directory }}/ if it does not exist."
         if [[ test -d "${{ inputs.badge-directory }}" ]]; then
