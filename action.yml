@@ -277,7 +277,7 @@ runs:
       shell: bash
 
     - name: Failure On MyPy Issues
-      if: steps.run-mypy.outcome == 'failure
+      if: steps.run-mypy.outcome == 'failure'
       run: |
         echo "::error file=action.yml,line=181::MyPy found issues. Failing the action."
         exit 1
