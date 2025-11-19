@@ -63,7 +63,7 @@ runs:
       if: inputs.requirements-file != '' && steps.setup-python.outcome == 'success'
       run: |
         echo "::notice file=action.yml,line=60::Installing additional requirements from ${{ inputs.requirements-file }}"
-        if [[ test -f "${{ inputs.requirements-file }}" ]]; then
+        if [ test -r "${{ inputs.requirements-file }}" ]; then
           pip3 install -r "${{ inputs.requirements-file }}" 2>&1 | tee requirements_output.txt && echo "::notice file=action.yml,line=61::Additional requirements installation completed." || { echo "::error file=action.yml,line=62::Additional requirements installation failed."; exit 1; }
         else
           echo "::warning file=action.yml,line=63::Requirements file not found: ${{ inputs.requirements-file }}"
@@ -246,7 +246,7 @@ runs:
       id: run-mypy
       if: steps.install-linting-tools.outcome == 'success' && always()
       run: |
-        if [ -z "${{ inputs.mypy_options }}" ]; then
+        if [[ -z "${{ inputs.mypy_options }}" ]]; then
           echo "::notice file=action.yml,line=105::No MyPy options provided, using default."
           mypy . 2>&1 | tee mypy_output.txt
         else
@@ -306,10 +306,9 @@ runs:
     - name: Generate SVG Badges
       id: generate-badges
       if: steps.install-linting-tools.outcome == 'success' && always()
-      run: |
-        echo "::notice file=action.yml,line=167::Creating badges directory ${{ inputs.badge-directory }}/ if it does not exist."
-        if [[ test -d "${{ inputs.badge-directory }}" ]]; then
-          echo "::notice file=action.yml,line=170::Badge directory already exists."
+      run: |  
+        if [ test -d "${{ inputs.badge-directory }}" ]; then
+          echo "::notice file=action.yml,line=170::Badge directory exists: ${{ inputs.badge-directory }}"
         else
           echo "::notice file=action.yml,line=172::Badge directory does not exist. Creating it now."
           mkdir -p "${{ inputs.badge-directory }}" && echo "::notice file=action.yml,line=174::Badge directory created successfully." || { echo "::error file=action.yml,line=175::Failed to create badge directory."; exit 1; }
