@@ -64,11 +64,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `badge-style` input to choose between relative paths or GitHub URLs (default: path)
 - Automatic README update functionality with marker support
 - Badge markers for controlled placement in README files
+- Support for specific version numbers in release workflow (e.g., 1.0.0 or v1.0.0)
 
 ### Changed
 - Badge generation is now opt-in via `generate-badges` input instead of always running
 - README updates are now opt-in via `update-readme` input
 - Improved badge generation logic with better error handling
+- Enhanced release workflow to accept explicit version numbers in addition to major/minor/patch
 
 ### Fixed
 - Aligned action.yml inputs with documented features in README.md
