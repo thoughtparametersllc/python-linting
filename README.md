@@ -18,8 +18,6 @@ GitHub Action to perform Python linting with Black, Pylint, and MyPy.
 
 ### Basic Example
 
-The basic usage runs Pylint, Black, and MyPy on your code. Badge generation is disabled by default.
-
 ```yaml
 - name: Python Linting
   uses: thoughtparametersllc/python-linting@v1
@@ -59,22 +57,7 @@ When `generate-badges` is enabled, SVG badges will be automatically generated an
 When `update-readme` is enabled, the action will automatically insert badge references into your README.md:
 - Badges are inserted after the title with special markers
 - You can customize the README path and badge style (relative paths or GitHub URLs)
-- The action preserves existing content and only updates the badge section
-- **Important**: Your workflow needs write permissions for contents to commit badges:
-  ```yaml
-  permissions:
-    contents: write
-  ```
-
-**Badge Markers** (optional - for controlled placement):
-
-You can add these markers to your README.md to control where badges are inserted:
-```markdown
-<!-- LINTING-BADGES-START -->
-<!-- LINTING-BADGES-END -->
-```
-
-If markers are not present, badges will be automatically inserted after the first heading.
+- The script preserves existing content and only updates the badge section
 
 **Manual Badge References** (if not using `update-readme`):
 

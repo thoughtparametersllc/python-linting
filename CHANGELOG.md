@@ -58,27 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- `generate-badges` input to control badge generation (default: false)
-- `update-readme` input to automatically update README with badges (default: false)
-- `readme-path` input to specify README file location (default: README.md)
-- `badge-style` input to choose between relative paths or GitHub URLs (default: path)
-- Automatic README update functionality with marker support
-- Badge markers for controlled placement in README files
-- Support for specific version numbers in release workflow (e.g., 1.0.0 or v1.0.0)
-
-### Changed
-- Badge generation is now opt-in via `generate-badges` input instead of always running
-- README updates are now opt-in via `update-readme` input
-- Improved badge generation logic with better error handling
-- Enhanced release workflow to accept explicit version numbers in addition to major/minor/patch
-
-### Fixed
-- Aligned action.yml inputs with documented features in README.md
-- Corrected CHANGELOG.md version history
-
-## [0.0.25] - 2025-11-19
-
-### Added
 - Comprehensive GitHub workflows for CI/CD
 - Workflow to test all GitHub Action features
 - Automatic tagging workflow for main branch with semantic versioning
@@ -86,7 +65,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changelog validation in release process
 - Security audit workflow with Dependabot
 - Lint and test workflow for PRs and pushes
+- Support for specific version numbers in release workflow (e.g., 1.0.0 or v1.0.0)
+
+### Changed
+- Enhanced release workflow to accept explicit version numbers in addition to major/minor/patch
+
+## [1.0.0] - Previous Release
+
+### Added
 - Initial Python linting action with Pylint, Black, and MyPy support
+- Badge generation and automatic README updates
 - Flexible Python version support
 - Custom requirements file support
 - Comprehensive linting with detailed reporting

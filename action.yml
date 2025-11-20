@@ -34,26 +34,6 @@ inputs:
     required: false
     default: '.github/badges'
 
-  generate-badges:
-    description: Generate and commit SVG badges to the repository. Defaults to false.
-    required: false
-    default: 'false'
-
-  update-readme:
-    description: Automatically update README.md with badge references. Defaults to false.
-    required: false
-    default: 'false'
-
-  readme-path:
-    description: Path to README.md file to update with badges. Defaults to README.md.
-    required: false
-    default: 'README.md'
-
-  badge-style:
-    description: Badge style - 'url' for GitHub URLs or 'path' for relative paths. Defaults to path.
-    required: false
-    default: 'path'
-
 runs:
   using: composite
   steps:
@@ -325,7 +305,7 @@ runs:
 
     - name: Generate SVG Badges
       id: generate-badges
-      if: steps.install-linting-tools.outcome == 'success' && inputs.generate-badges == 'true' && always()
+      if: steps.install-linting-tools.outcome == 'success' && always()
       run: |  
         if [ test -d "${{ inputs.badge-directory }}" ]; then
           echo "::notice file=action.yml,line=170::Badge directory exists: ${{ inputs.badge-directory }}"
@@ -400,75 +380,6 @@ runs:
       shell: bash
       continue-on-error: true
 
-    - name: Update README with Badges
-      id: update-readme
-      if: steps.generate-badges.outcome == 'success' && inputs.update-readme == 'true'
-      run: |
-        README_FILE="${{ inputs.readme-path }}"
-        BADGE_DIR="${{ inputs.badge-directory }}"
-        BADGE_STYLE="${{ inputs.badge-style }}"
-        
-        echo "::notice file=action.yml,line=398::Updating README with badge references"
-        
-        # Check if README exists
-        if [ ! -f "$README_FILE" ]; then
-          echo "::warning file=action.yml,line=402::README file not found: $README_FILE"
-          exit 0
-        fi
-        
-        # Define badge markers
-        MARKER_START="<!-- LINTING-BADGES-START -->"
-        MARKER_END="<!-- LINTING-BADGES-END -->"
-        
-        # Generate badge references based on style
-        if [ "$BADGE_STYLE" == "url" ]; then
-          # Use GitHub raw URLs
-          REPO="${{ github.repository }}"
-          BRANCH="${{ github.ref_name }}"
-          PYLINT_BADGE="![Pylint](https://raw.githubusercontent.com/$REPO/$BRANCH/$BADGE_DIR/pylint.svg)"
-          BLACK_BADGE="![Black](https://raw.githubusercontent.com/$REPO/$BRANCH/$BADGE_DIR/black.svg)"
-          MYPY_BADGE="![MyPy](https://raw.githubusercontent.com/$REPO/$BRANCH/$BADGE_DIR/mypy.svg)"
-        else
-          # Use relative paths
-          PYLINT_BADGE="![Pylint]($BADGE_DIR/pylint.svg)"
-          BLACK_BADGE="![Black]($BADGE_DIR/black.svg)"
-          MYPY_BADGE="![MyPy]($BADGE_DIR/mypy.svg)"
-        fi
-        
-        # Check if markers exist
-        if grep -q "$MARKER_START" "$README_FILE" && grep -q "$MARKER_END" "$README_FILE"; then
-          echo "::notice file=action.yml,line=426::Updating existing badge section in README"
-          
-          # Create badge content
-          BADGE_CONTENT="$MARKER_START\n$PYLINT_BADGE\n$BLACK_BADGE\n$MYPY_BADGE\n$MARKER_END"
-          
-          # Replace content between markers using awk
-          awk -v start="$MARKER_START" -v end="$MARKER_END" -v content="$BADGE_CONTENT" '
-            $0 ~ start {print content; skip=1; next}
-            $0 ~ end {skip=0; next}
-            !skip
-          ' "$README_FILE" > "${README_FILE}.tmp"
-          
-          mv "${README_FILE}.tmp" "$README_FILE"
-          echo "::notice file=action.yml,line=438::README updated successfully"
-        else
-          echo "::notice file=action.yml,line=440::Badge markers not found in README. Adding badges after title."
-          
-          # Insert badges after the first title (# heading)
-          BADGE_SECTION="\n$MARKER_START\n$PYLINT_BADGE\n$BLACK_BADGE\n$MYPY_BADGE\n$MARKER_END\n"
-          
-          # Use awk to insert after first # heading
-          awk -v section="$BADGE_SECTION" '
-            !inserted && /^# / {print; print section; inserted=1; next}
-            {print}
-          ' "$README_FILE" > "${README_FILE}.tmp"
-          
-          mv "${README_FILE}.tmp" "$README_FILE"
-          echo "::notice file=action.yml,line=452::Badges added to README successfully"
-        fi
-      shell: bash
-      continue-on-error: true
-
     - name: Commit Badges To Repository
       id: commit-badges
       if: steps.generate-badges.outcome == 'success'
@@ -487,12 +398,6 @@ runs:
         git add "${{ inputs.badge-directory }}/pylint.svg" && echo "::notice file=action.yml,line=267::Adding pylint badge to commit." || { echo "::warning file=action.yml,line=268::Failed to add pylint badge."; }
         git add "${{ inputs.badge-directory }}/black.svg" && echo "::notice file=action.yml,line=270::Adding black badge to commit." || { echo "::warning file=action.yml,line=271::Failed to add black badge."; }
         git add "${{ inputs.badge-directory }}/mypy.svg" && echo "::notice file=action.yml,line=273::Adding mypy badge to commit." || { echo "::warning file=action.yml,line=274::Failed to add mypy badge."; }
-        
-        # Add README if it was updated
-        if [ "${{ inputs.update-readme }}" == "true" ] && [ "${{ steps.update-readme.outcome }}" == "success" ]; then
-          git add "${{ inputs.readme-path }}" && echo "::notice file=action.yml,line=276::Adding README to commit." || { echo "::warning file=action.yml,line=277::Failed to add README."; }
-        fi
-        
         git commit -m "Update linting badges [skip ci]" && echo "::notice file=action.yml,line=302::Committing changes to repository." || { echo "::warning file=action.yml,line=303::No changes to commit."; exit 0; }
         
         # Push changes to repository
