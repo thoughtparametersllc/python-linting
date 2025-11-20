@@ -95,6 +95,20 @@ This repository includes comprehensive GitHub workflows for CI/CD:
 
 For detailed workflow documentation, see [.github/WORKFLOWS.md](.github/WORKFLOWS.md).
 
+### Releasing
+
+The release workflow supports both automatic semantic versioning and manual version specification:
+
+**Automatic Release** (when changes are merged to main):
+- Automatically detects version bump from CHANGELOG.md
+- Creates release with extracted changelog notes
+- Updates major version tag (e.g., v1)
+
+**Manual Release** (for specific versions):
+1. Go to Actions → Release and Marketplace → Run workflow
+2. Enter version as `1.0.0` or `v1.0.0` (for specific version) or `major`/`minor`/`patch` (for semantic bump)
+3. The workflow will create the release and update tags
+
 ### Contributing
 
 1. Fork the repository

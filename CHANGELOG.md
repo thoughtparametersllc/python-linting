@@ -65,6 +65,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changelog validation in release process
 - Security audit workflow with Dependabot
 - Lint and test workflow for PRs and pushes
+- Support for specific version numbers in release workflow (e.g., 1.0.0 or v1.0.0)
+
+### Changed
+- Enhanced release workflow to accept explicit version numbers in addition to major/minor/patch
 
 ## [1.0.0] - Previous Release
 
