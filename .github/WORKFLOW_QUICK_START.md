@@ -7,6 +7,7 @@ This guide provides a quick reference for using the GitHub workflows in this rep
 ### Making a Pull Request
 
 1. **Create your feature branch**:
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -14,8 +15,9 @@ This guide provides a quick reference for using the GitHub workflows in this rep
 2. **Make your changes**:
    - Edit code files as needed
    - Update `CHANGELOG.md` under the `[Unreleased]` section:
-     ```markdown
-     ## [Unreleased]
+
+      ```markdown
+      ## [Unreleased]
      
      ### Added
      - Your new feature description
@@ -28,6 +30,7 @@ This guide provides a quick reference for using the GitHub workflows in this rep
      ```
 
 3. **Commit and push**:
+
    ```bash
    git add .
    git commit -m "Your descriptive commit message"
@@ -186,6 +189,7 @@ To manually run any workflow:
 **Symptom**: Red X on PR checks
 
 **Solutions**:
+
 1. Click "Details" to view logs
 2. Common issues:
    - **Changelog Check fails**: Update CHANGELOG.md
@@ -198,18 +202,22 @@ To manually run any workflow:
 **Symptom**: Merged to main but no release
 
 **Possible causes**:
+
 1. **No unreleased changes**: CHANGELOG.md missing Unreleased section
 2. **Empty unreleased section**: No entries under Unreleased
 3. **Invalid format**: Changelog doesn't follow Keep a Changelog format
 
 **Solution**:
+
 1. Check CHANGELOG.md has:
+
    ```markdown
    ## [Unreleased]
    
    ### Added
    - Something here
    ```
+
 2. Push to main or run release workflow manually
 
 ### Test Action Workflow Fails
@@ -217,14 +225,17 @@ To manually run any workflow:
 **Symptom**: test-action.yml fails
 
 **Common causes**:
+
 1. **Action.yml syntax error**: Validate YAML
 2. **Script error**: Check update_badges.py
 3. **Missing dependencies**: Check action setup steps
 
 **Debug**:
+
 1. View workflow logs
 2. Test action locally with act (if available)
 3. Test update_badges.py manually:
+
    ```bash
    python3 update_badges.py --help
    ```
@@ -234,6 +245,7 @@ To manually run any workflow:
 ### Commit Messages
 
 Use conventional commits:
+
 - `feat: Add new feature`
 - `fix: Fix bug in badge generation`
 - `docs: Update documentation`

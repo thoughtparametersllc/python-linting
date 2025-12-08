@@ -13,11 +13,13 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 **Purpose**: Validates all features of the Python Linting GitHub Action.
 
 **Triggers**:
+
 - Pull requests to `main` (when action files change)
 - Pushes to `main` (when action files change)
 - Manual workflow dispatch
 
 **Jobs**:
+
 - **test-basic-linting**: Tests basic linting functionality
 - **test-custom-options**: Tests custom linting options
 - **test-requirements-file**: Tests with requirements file
@@ -28,6 +30,7 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 - **test-summary**: Provides a summary of all tests
 
 **Key Features**:
+
 - Creates test Python files dynamically
 - Validates badge generation
 - Verifies README update functionality
@@ -39,18 +42,22 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 **Purpose**: Ensures CHANGELOG.md is updated for substantive changes.
 
 **Triggers**:
+
 - Pull requests to `main` (on open, sync, reopen, ready_for_review)
 
 **Jobs**:
+
 - **check-changelog**: Validates changelog updates
 
 **Logic**:
+
 - Detects if substantive files were changed (not just docs/CI)
 - Requires CHANGELOG.md update for substantive changes
 - Verifies content exists in the Unreleased section
 - Exempts documentation-only changes
 
 **Validation Rules**:
+
 - CHANGELOG.md must be modified if code changes
 - Unreleased section must have entries
 - Follows Keep a Changelog format
@@ -60,19 +67,19 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 **Purpose**: Runs comprehensive linting and testing on all code changes.
 
 **Triggers**:
+
 - Pull requests to `main`
 - Pushes to `main`
 - Manual workflow dispatch
 
 **Jobs**:
-- **lint-python**: Runs Black, Pylint, MyPy, and Flake8
+
 - **lint-yaml**: Validates YAML syntax
-- **test-update-badges**: Tests `update_badges.py` functionality
 - **shellcheck**: Validates shell script syntax
-- **security-scan**: Runs Bandit and Safety security scans
 - **test-summary**: Provides completion summary
 
 **Quality Checks**:
+
 - Code formatting (Black)
 - Code quality (Pylint, Flake8)
 - Type checking (MyPy)
@@ -84,10 +91,12 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 **Purpose**: Automates semantic versioning, tagging, and release creation.
 
 **Triggers**:
+
 - Pushes to `main`
 - Manual workflow dispatch (with version input)
 
 **Jobs**:
+
 - **check-changelog**: Validates unreleased changes exist
 - **determine-version**: Calculates next semantic version
 - **create-release**: Creates GitHub release with changelog notes
@@ -95,12 +104,14 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 - **workflow-summary**: Summarizes release process
 
 **Versioning Logic**:
+
 - Automatically determines version bump (major/minor/patch)
 - Defaults to patch version increment
 - Detects breaking changes from changelog
 - Supports manual version override
 
 **Release Process**:
+
 1. Checks for unreleased changes in CHANGELOG.md
 2. Determines next version based on changes
 3. Updates CHANGELOG.md with version and date
@@ -110,6 +121,7 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 7. Provides marketplace submission instructions
 
 **Requirements**:
+
 - CHANGELOG.md must have Unreleased section with content
 - Must follow Keep a Changelog format
 - Semantic versioning (MAJOR.MINOR.PATCH)
@@ -119,12 +131,14 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 **Purpose**: Performs comprehensive security scanning and audits.
 
 **Triggers**:
+
 - Schedule (daily at 2 AM UTC)
 - Pushes to `main`
 - Pull requests to `main`
 - Manual workflow dispatch
 
 **Jobs**:
+
 - **dependency-review**: Reviews dependency changes in PRs
 - **python-security-scan**: Runs Bandit, pip-audit, and Safety
 - **codeql-analysis**: Performs CodeQL security analysis
@@ -133,13 +147,15 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 - **security-summary**: Provides audit summary
 
 **Security Checks**:
+
 - Dependency vulnerabilities (Dependency Review, pip-audit, Safety)
-- Code security issues (Bandit, CodeQL)
+- Code security issues (CodeQL)
 - Secret leakage (TruffleHog)
 - Workflow permission review
 - Action.yml security validation
 
 **Artifacts**:
+
 - Bandit security report (JSON)
 - Safety security report (JSON)
 - CodeQL analysis results
@@ -149,6 +165,7 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 **Purpose**: Automated dependency update management.
 
 **Configuration**:
+
 - **GitHub Actions**: Weekly updates on Mondays
 - **Python packages**: Weekly updates on Mondays
 - Auto-assigns reviewers
@@ -156,12 +173,14 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 - Ignores major version updates by default
 
 **Labels**:
+
 - `dependencies`
 - `github-actions` or `python` (ecosystem-specific)
 
 ## Workflow Permissions
 
 All workflows follow the principle of least privilege:
+
 - Read-only by default
 - Write permissions only where required (e.g., release creation, badge commits)
 - Explicit permission declarations in workflows
@@ -177,7 +196,7 @@ All workflows follow the principle of least privilege:
 
 ## Workflow Dependencies
 
-```
+```text
 test-action.yml (validates action)
      ↓
 lint-test.yml (validates code quality)
@@ -207,7 +226,8 @@ Security workflows run independently and continuously.
    - Manually publish to GitHub Marketplace if desired
 
 3. **Manual Release**:
-   ```
+
+   ```text
    GitHub Actions → release.yml → Run workflow
    Select version: major/minor/patch or specific version
    ```
@@ -222,16 +242,19 @@ Security workflows run independently and continuously.
 ## Troubleshooting
 
 ### Release Not Created
+
 - Check CHANGELOG.md has `[Unreleased]` section with content
 - Verify changelog follows Keep a Changelog format
 - Check workflow logs for errors
 
 ### Tests Failing
+
 - Review test logs in `test-action.yml`
 - Ensure all action features work correctly
 - Validate badge generation and README updates
 
 ### Security Alerts
+
 - Review security audit job outputs
 - Check uploaded security report artifacts
 - Address vulnerabilities before merging
@@ -239,13 +262,16 @@ Security workflows run independently and continuously.
 ## Maintenance
 
 ### Regular Tasks
+
 - Weekly: Review and merge Dependabot PRs
 - Daily: Monitor security audit results
 - Per release: Update CHANGELOG.md
 - As needed: Review and update workflow configurations
 
 ### Workflow Updates
+
 When updating workflows:
+
 1. Test changes in a feature branch
 2. Update this documentation
 3. Update CHANGELOG.md

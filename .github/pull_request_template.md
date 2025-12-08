@@ -1,3 +1,7 @@
+# Pull Request Details
+
+This provides the basic details of the type, related issues, changes made, and changelog for the given pull request.
+
 ## Description
 
 <!-- Provide a brief description of the changes in this PR -->
