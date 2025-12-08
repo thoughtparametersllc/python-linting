@@ -5,9 +5,9 @@ name: Lint and Test
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 jobs:
@@ -24,20 +24,24 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
+        continue-on-error: false
 
       - name: Install yamllint
         run: |
           python -m pip install --upgrade pip
           pip install yamllint
+        continue-on-error: false
 
       - name: Run yamllint
         run: |
           echo "Running yamllint on workflow files..."
-          yamllint -d '{extends: default, rules: {line-length: {max: 120}, comments: {min-spaces-from-content: 1}}}' .github/workflows/ || true
-        continue-on-error: true
+          yamllint -d  \
+            '{extends: default, rules: {line-length: {max: 120}, comments: {min-spaces-from-content: 1}}}' .github/workflows/ \
+            || true
+        continue-on-error: false
 
       - name: Validate action.yml
         run: |
           echo "Validating action.yml syntax..."
           python -c "import yaml; yaml.safe_load(open('action.yml'))" && echo "✓ action.yml is valid YAML"
-
+        continue-on-error: false

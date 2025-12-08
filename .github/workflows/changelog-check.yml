@@ -5,7 +5,7 @@ name: Changelog Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
@@ -29,7 +29,9 @@ jobs:
           echo "$CHANGED_FILES"
           
           # Check if any substantive files were changed (not just docs or CI)
-          SUBSTANTIVE_CHANGES=$(echo "$CHANGED_FILES" | grep -vE '^(\.github/|CHANGELOG\.md|README\.md|LICENSE|\.gitignore)' || true)
+          SUBSTANTIVE_CHANGES=$(echo "$CHANGED_FILES" | grep -vE \
+            '^(\.github/|CHANGELOG\.md|README\.md|LICENSE|\.gitignore)' \
+            || true)
           
           if [ -z "$SUBSTANTIVE_CHANGES" ]; then
             echo "substantive_changes=false" >> $GITHUB_OUTPUT
@@ -57,7 +59,8 @@ jobs:
           echo "Checking CHANGELOG.md content..."
           
           # Check if there's content in the Unreleased section
-          if grep -A 10 "## \[Unreleased\]" CHANGELOG.md | grep -qE "^### (Added|Changed|Deprecated|Removed|Fixed|Security)"; then
+          if grep -A 10 "## \[Unreleased\]" CHANGELOG.md | grep -qE \
+            "^### (Added|Changed|Deprecated|Removed|Fixed|Security)"; then
             echo "✓ CHANGELOG.md has entries in the Unreleased section"
           else
             echo "⚠ Warning: CHANGELOG.md may not have entries in the Unreleased section"

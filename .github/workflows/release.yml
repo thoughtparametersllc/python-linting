@@ -5,7 +5,7 @@ name: Release and Marketplace
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       version:
@@ -33,7 +33,8 @@ jobs:
         run: |
           if grep -q "## \[Unreleased\]" CHANGELOG.md; then
             # Check if there's actual content under Unreleased
-            if grep -A 20 "## \[Unreleased\]" CHANGELOG.md | grep -qE "^### (Added|Changed|Deprecated|Removed|Fixed|Security)"; then
+            if grep -A 20 "## \[Unreleased\]" CHANGELOG.md /| \
+               grep -qE "^### (Added|Changed|Deprecated|Removed|Fixed|Security)"; then
               echo "has_unreleased=true" >> $GITHUB_OUTPUT
               echo "✓ Found unreleased changes in CHANGELOG.md"
             else
@@ -51,7 +52,7 @@ jobs:
         run: |
           # Extract content between [Unreleased] and the next version heading
           NOTES=$(awk '/## \[Unreleased\]/,/^## \[/' CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
-          
+
           # Save to output (handle multiline)
           echo "release_notes<<EOF" >> $GITHUB_OUTPUT
           echo "$NOTES" >> $GITHUB_OUTPUT
