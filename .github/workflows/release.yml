@@ -92,7 +92,7 @@ jobs:
           fi
 
       - name: Determine version bump
-        id: version
+        id: determine-version
         run: |
           LATEST_TAG="${{ steps.get-latest-tag.outputs.latest_tag }}"
           
@@ -145,6 +145,7 @@ jobs:
             esac
             
             NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+            MTAG="v${MAJOR}"
           fi
           
           echo "Previous version: $LATEST_TAG"
@@ -192,7 +193,7 @@ jobs:
           
           git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
           git push origin "$NEW_VERSION"
-          
+
           echo "✓ Created and pushed tag $NEW_VERSION"
 
       - name: Create GitHub Release

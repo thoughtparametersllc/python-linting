@@ -18,7 +18,7 @@ GitHub Action to perform Python linting with Black, Pylint, and MyPy.
 
 ```yaml
 - name: Python Linting
-  uses: thoughtparametersllc/python-linting@v1.0.0
+  uses: thoughtparametersllc/python-linting@v1
   permissions:
     contents: write
 ```
@@ -27,7 +27,7 @@ GitHub Action to perform Python linting with Black, Pylint, and MyPy.
 
 ```yaml
 - name: Python Linting
-  uses: thoughtparametersllc/python-linting@v1.0.0
+  uses: thoughtparametersllc/python-linting@v1
   permissions:
     contents: write
   with:
