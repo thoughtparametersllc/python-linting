@@ -33,7 +33,7 @@ jobs:
         run: |
           if grep -q "## \[Unreleased\]" CHANGELOG.md; then
             # Check if there's actual content under Unreleased
-            if grep -A 20 "## \[Unreleased\]" CHANGELOG.md /| \
+            if grep -A 20 "## \[Unreleased\]" CHANGELOG.md | \
                grep -qE "^### (Added|Changed|Deprecated|Removed|Fixed|Security)"; then
               echo "has_unreleased=true" >> $GITHUB_OUTPUT
               echo "✓ Found unreleased changes in CHANGELOG.md"
