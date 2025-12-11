@@ -66,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Comprehensive GitHub workflows for CI/CD
 - Workflow to test all GitHub Action features
 - Automatic tagging workflow for main branch with semantic versioning
@@ -74,13 +75,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security audit workflow with Dependabot
 - Lint and test workflow for PRs and pushes
 - Support for specific version numbers in release workflow (e.g., 1.0.0 or v1.0.0)
+- Change action inputs for pylint, black, and mypy to use - instead of _
+- Added support for disabling svg badge commits
 
 ### Changed
+
 - Enhanced release workflow to accept explicit version numbers in addition to major/minor/patch
 
 ## [1.0.0] - Previous Release
 
 ### Added
+
 - Initial Python linting action with Pylint, Black, and MyPy support
 - Badge generation and automatic README updates
 - Flexible Python version support
