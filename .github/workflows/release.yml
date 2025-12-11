@@ -69,8 +69,8 @@ jobs:
     needs: check-changelog
     if: needs.check-changelog.outputs.has_unreleased == 'true' || github.event_name == 'workflow_dispatch'
     outputs:
-      new_version: ${{ steps.version.outputs.new_version }}
-      previous_version: ${{ steps.version.outputs.previous_version }}
+      new_version: ${{ steps.determine-version.outputs.new_version }}
+      previous_version: ${{ steps.determine-version.outputs.previous_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
