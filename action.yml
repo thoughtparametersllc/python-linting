@@ -13,21 +13,25 @@ inputs:
     default: '3.x'
 
   requirements-file:
-    description: Path to a requirements file to install before linting. If not specified, only pylint, black, and mypy will be installed.
-    required: false
-    default: ''
+    description: Path to a requirements file to install before linting. 
+    default: 'requirements.txt'
 
-  pylint_options:
+  pylint-options:
     description: The pylint options to pass to pylint.
     required: false
 
-  black_options:
+  black-options:
     description: The black options to pass to black.
     required: false
 
-  mypy_options:
+  mypy-options:
     description: The mypy options to pass to mypy.
     required: false
+
+  commit-badges:
+    description: Whether to commit the generated SVG badges back to the repository. Set to 'true' to enable.
+    required: false
+    default: 'true'
 
   badge-directory:
     description: Directory to save the generated SVG badges. Defaults to .github/badges.
@@ -126,12 +130,12 @@ runs:
       id: run-pylint
       if: steps.install-linting-tools.outcome == 'success' && always()
       run: |
-        if [[ -z "${{ inputs.pylint_options }}" ]]; then
+        if [[ -z "${{ inputs.pylint-options }}" ]]; then
           echo "::notice file=action.yml,line=66::No Pylint options provided, using default."
           pylint --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt && echo "::notice file=action.yml,line=68::Pylint run completed." || { echo "::error file=action.yml,line=69::Pylint run failed."; exit 1; }
         else
-          echo "::notice file=action.yml,line=68::Using Pylint options: ${{ inputs.pylint_options }}"
-          pylint ${{ inputs.pylint_options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt && echo "::notice file=action.yml,line=70::Pylint run completed." || { echo "::error file=action.yml,line=71::Pylint run failed."; exit 1; }
+          echo "::notice file=action.yml,line=68::Using Pylint options: ${{ inputs.pylint-options }}"
+          pylint ${{ inputs.pylint-options }} --reports=y --jobs=0 . 2>&1 | tee pylint_output.txt && echo "::notice file=action.yml,line=70::Pylint run completed." || { echo "::error file=action.yml,line=71::Pylint run failed."; exit 1; }
         fi
       shell: bash
       continue-on-error: true
@@ -190,12 +194,12 @@ runs:
       id: run-black
       if: steps.install-linting-tools.outcome == 'success' && always()
       run: |
-        if [[ -z "${{ inputs.black_options }}" ]]; then
+        if [[ -z "${{ inputs.black-options }}" ]]; then
           echo "::notice file=action.yml,line=88::No Black options provided, using default."
           black --check . 2>&1 | tee black_output.txt && echo "::notice file=action.yml,line=90::Black run completed." || { echo "::error file=action.yml,line=91::Black run failed."; exit 1; }
         else
-          echo "::notice file=action.yml,line=88::Running Black with options: ${{ inputs.black_options }}"
-          black --check ${{ inputs.black_options }} . 2>&1 | tee black_output.txt && echo "::notice file=action.yml,line=90::Black run completed." || { echo "::error file=action.yml,line=91::Black run failed."; exit 1; }
+          echo "::notice file=action.yml,line=88::Running Black with options: ${{ inputs.black-options }}"
+          black --check ${{ inputs.black-options }} . 2>&1 | tee black_output.txt && echo "::notice file=action.yml,line=90::Black run completed." || { echo "::error file=action.yml,line=91::Black run failed."; exit 1; }
         fi
       shell: bash
       continue-on-error: true
@@ -255,12 +259,12 @@ runs:
       id: run-mypy
       if: steps.install-linting-tools.outcome == 'success' && always()
       run: |
-        if [[ -z "${{ inputs.mypy_options }}" ]]; then
+        if [[ -z "${{ inputs.mypy-options }}" ]]; then
           echo "::notice file=action.yml,line=105::No MyPy options provided, using default."
           mypy . 2>&1 | tee mypy_output.txt
         else
-          echo "::notice file=action.yml,line=108::Using MyPy options: ${{ inputs.mypy_options }}"
-          mypy ${{ inputs.mypy_options }} . 2>&1 | tee mypy_output.txt && echo "::notice file=action.yml,line=110::MyPy run completed." || { echo "::error file=action.yml,line=111::MyPy run failed."; exit 1; }
+          echo "::notice file=action.yml,line=108::Using MyPy options: ${{ inputs.mypy-options }}"
+          mypy ${{ inputs.mypy-options }} . 2>&1 | tee mypy_output.txt && echo "::notice file=action.yml,line=110::MyPy run completed." || { echo "::error file=action.yml,line=111::MyPy run failed."; exit 1; }
         fi
       shell: bash
       continue-on-error: true
@@ -317,7 +321,7 @@ runs:
 
     - name: Generate SVG Badges
       id: generate-badges
-      if: steps.install-linting-tools.outcome == 'success' && always()
+      if: steps.install-linting-tools.outcome == 'success' && inputs.commit-badges == 'true'
       run: |  
         if [ test -d "${{ inputs.badge-directory }}" ]; then
           echo "::notice file=action.yml,line=170::Badge directory exists: ${{ inputs.badge-directory }}"
@@ -394,7 +398,7 @@ runs:
 
     - name: Commit Badges To Repository
       id: commit-badges
-      if: steps.generate-badges.outcome == 'success'
+      if: steps.generate-badges.outcome == 'success' && inputs.commit-badges == 'true'
       run: |
         # Configure git
         git config --local user.email "github-actions[bot]@users.noreply.github.com" && echo "::notice file=action.yml,line=253::Git user email set successfully." || { echo "::warning file=action.yml,line=254::Failed to set git user email."; exit 134; }
