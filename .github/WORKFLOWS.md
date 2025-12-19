@@ -4,40 +4,11 @@ This document describes the GitHub Actions workflows implemented in this reposit
 
 ## Overview
 
-The repository includes a comprehensive suite of CI/CD workflows that ensure code quality, security, and automated releases. All workflows follow security best practices and are designed to be modular and maintainable.
+The repository includes CI/CD workflows that ensure code quality and automated releases. All workflows follow security best practices and are designed to be modular and maintainable.
 
 ## Workflows
 
-### 1. Test Action (`test-action.yml`)
-
-**Purpose**: Validates all features of the Python Linting GitHub Action.
-
-**Triggers**:
-
-- Pull requests to `main` (when action files change)
-- Pushes to `main` (when action files change)
-- Manual workflow dispatch
-
-**Jobs**:
-
-- **test-basic-linting**: Tests basic linting functionality
-- **test-custom-options**: Tests custom linting options
-- **test-requirements-file**: Tests with requirements file
-- **test-badge-generation**: Tests SVG badge generation
-- **test-readme-update**: Tests automatic README updates
-- **test-update-badges-script**: Tests `update_badges.py` directly
-- **test-python-versions**: Tests multiple Python versions (3.9-3.12)
-- **test-summary**: Provides a summary of all tests
-
-**Key Features**:
-
-- Creates test Python files dynamically
-- Validates badge generation
-- Verifies README update functionality
-- Tests across multiple Python versions
-- Comprehensive validation of all action features
-
-### 2. Changelog Check (`changelog-check.yml`)
+### 1. Changelog Check (`changelog-check.yml`)
 
 **Purpose**: Ensures CHANGELOG.md is updated for substantive changes.
 
@@ -62,9 +33,9 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 - Unreleased section must have entries
 - Follows Keep a Changelog format
 
-### 3. Lint and Test (`lint-test.yml`)
+### 2. Lint and Test (`lint-test.yml`)
 
-**Purpose**: Runs comprehensive linting and testing on all code changes.
+**Purpose**: Validates YAML syntax and formatting for workflow files and the action.yml using yamllint with strict rules.
 
 **Triggers**:
 
@@ -74,19 +45,20 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 
 **Jobs**:
 
-- **lint-yaml**: Validates YAML syntax
-- **shellcheck**: Validates shell script syntax
-- **test-summary**: Provides completion summary
+- **lint-yaml**: Validates YAML syntax using yamllint
+  - Lints all workflow files in `.github/workflows/`
+  - Validates `action.yml` syntax and structure
+  - Enforces formatting standards with custom rules
 
 **Quality Checks**:
 
-- Code formatting (Black)
-- Code quality (Pylint, Flake8)
-- Type checking (MyPy)
-- YAML validation
-- Security vulnerabilities (Bandit, Safety)
+- YAML syntax validation (ensures valid YAML structure)
+- Line length enforcement (max 120 characters)
+- Consistent indentation (2 or 4 spaces)
+- Comment spacing (minimum 1 space from content)
+- Proper YAML formatting standards
 
-### 4. Release and Marketplace (`release.yml`)
+### 3. Release and Marketplace (`release.yml`)
 
 **Purpose**: Automates semantic versioning, tagging, and release creation.
 
@@ -126,57 +98,6 @@ The repository includes a comprehensive suite of CI/CD workflows that ensure cod
 - Must follow Keep a Changelog format
 - Semantic versioning (MAJOR.MINOR.PATCH)
 
-### 5. Security Audit (`security-audit.yml`)
-
-**Purpose**: Performs comprehensive security scanning and audits.
-
-**Triggers**:
-
-- Schedule (daily at 2 AM UTC)
-- Pushes to `main`
-- Pull requests to `main`
-- Manual workflow dispatch
-
-**Jobs**:
-
-- **dependency-review**: Reviews dependency changes in PRs
-- **python-security-scan**: Runs Bandit, pip-audit, and Safety
-- **codeql-analysis**: Performs CodeQL security analysis
-- **secret-scanning**: Scans for leaked secrets with TruffleHog
-- **workflow-security**: Validates workflow security practices
-- **security-summary**: Provides audit summary
-
-**Security Checks**:
-
-- Dependency vulnerabilities (Dependency Review, pip-audit, Safety)
-- Code security issues (CodeQL)
-- Secret leakage (TruffleHog)
-- Workflow permission review
-- Action.yml security validation
-
-**Artifacts**:
-
-- Bandit security report (JSON)
-- Safety security report (JSON)
-- CodeQL analysis results
-
-### 6. Dependabot Configuration (`dependabot.yml`)
-
-**Purpose**: Automated dependency update management.
-
-**Configuration**:
-
-- **GitHub Actions**: Weekly updates on Mondays
-- **Python packages**: Weekly updates on Mondays
-- Auto-assigns reviewers
-- Limits open PRs to 5 per ecosystem
-- Ignores major version updates by default
-
-**Labels**:
-
-- `dependencies`
-- `github-actions` or `python` (ecosystem-specific)
-
 ## Workflow Permissions
 
 All workflows follow the principle of least privilege:
@@ -189,17 +110,12 @@ All workflows follow the principle of least privilege:
 
 1. **Pinned Actions**: All third-party actions use specific versions
 2. **Minimal Permissions**: Workflows request only necessary permissions
-3. **Secret Handling**: No secrets exposed in logs or artifacts
-4. **Input Validation**: All workflow inputs are validated
-5. **Dependency Scanning**: Automated vulnerability detection
-6. **Code Analysis**: Static and dynamic security analysis
+3. **Input Validation**: All workflow inputs are validated
 
 ## Workflow Dependencies
 
 ```text
-test-action.yml (validates action)
-     ↓
-lint-test.yml (validates code quality)
+lint-test.yml (validates YAML syntax)
      ↓
 changelog-check.yml (validates documentation)
      ↓
@@ -208,17 +124,14 @@ release.yml (creates releases)
 marketplace submission (manual)
 ```
 
-Security workflows run independently and continuously.
-
 ## Usage Guidelines
 
 ### For Contributors
 
 1. **Making Changes**:
    - Update CHANGELOG.md under `[Unreleased]` section
-   - Ensure all tests pass in `test-action.yml`
-   - Address linting issues from `lint-test.yml`
-   - Review security scan results
+   - Ensure YAML files pass `lint-test.yml` validation
+   - Follow changelog format requirements
 
 2. **Creating Releases**:
    - Merge changes to `main` with updated CHANGELOG.md
@@ -234,10 +147,9 @@ Security workflows run independently and continuously.
 
 ### For Maintainers
 
-1. **Review Dependabot PRs**: Check and merge dependency updates
-2. **Monitor Security Scans**: Review daily security audit results
-3. **Release Approval**: Verify changelog before merging to main
-4. **Marketplace**: Manually publish new versions to marketplace
+1. **Release Approval**: Verify changelog before merging to main
+2. **Marketplace**: Manually publish new versions to marketplace
+3. **Version Tags**: Ensure major version tags (e.g., v1) point to latest release
 
 ## Troubleshooting
 
@@ -247,26 +159,20 @@ Security workflows run independently and continuously.
 - Verify changelog follows Keep a Changelog format
 - Check workflow logs for errors
 
-### Tests Failing
+### YAML Linting Fails
 
-- Review test logs in `test-action.yml`
-- Ensure all action features work correctly
-- Validate badge generation and README updates
-
-### Security Alerts
-
-- Review security audit job outputs
-- Check uploaded security report artifacts
-- Address vulnerabilities before merging
+- Review lint-test.yml workflow logs
+- Check for YAML syntax errors in workflow files
+- Ensure action.yml is valid YAML
+- Verify line length limits (max 120 characters)
 
 ## Maintenance
 
 ### Regular Tasks
 
-- Weekly: Review and merge Dependabot PRs
-- Daily: Monitor security audit results
 - Per release: Update CHANGELOG.md
 - As needed: Review and update workflow configurations
+- Monitor workflow runs for failures
 
 ### Workflow Updates
 
