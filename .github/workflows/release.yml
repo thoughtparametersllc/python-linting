@@ -254,6 +254,7 @@ jobs:
     permissions:
       contents: read
     needs:
+      - determine-version
       - create-release
       - marketplace-submission
     steps:
