@@ -40,7 +40,7 @@ This guide provides a quick reference for using the GitHub workflows in this rep
 4. **Create Pull Request**:
    - Go to GitHub and create a PR to `main`
    - Wait for automated checks to complete:
-     - ✅ Lint & Test - validates YAML syntax
+     - ✅ Lint & Test - validates YAML syntax, formatting, and action.yml structure
      - ✅ Changelog Check - verifies changelog update
 
 5. **Address any failures**:

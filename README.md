@@ -71,7 +71,7 @@ jobs:
 - name: Python Linting
   uses: thoughtparametersllc/python-linting@v1
   with:
-    python-version: '3.10'
+    python-version: '3.10'  # Always quote version numbers
     commit-badges: 'false'  # Disable automatic badge commits
 ```
 
@@ -201,7 +201,7 @@ permissions:
 - Setting `commit-badges: 'false'` for PRs from forks
 - Using a conditional in your workflow:
   ```yaml
-  commit-badges: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+  commit-badges: ${{ github.event.pull_request.head.repo.full_name == github.repository && 'true' || 'false' }}
   ```
 
 ## How It Works
@@ -246,8 +246,6 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Required for badge commits
       
       - name: Python Linting
         uses: thoughtparametersllc/python-linting@v1

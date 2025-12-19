@@ -35,7 +35,7 @@ The repository includes CI/CD workflows that ensure code quality and automated r
 
 ### 2. Lint and Test (`lint-test.yml`)
 
-**Purpose**: Validates YAML syntax for workflow files and the action.yml.
+**Purpose**: Validates YAML syntax and formatting for workflow files and the action.yml using yamllint with strict rules.
 
 **Triggers**:
 
@@ -47,15 +47,16 @@ The repository includes CI/CD workflows that ensure code quality and automated r
 
 - **lint-yaml**: Validates YAML syntax using yamllint
   - Lints all workflow files in `.github/workflows/`
-  - Validates `action.yml` syntax
-  - Ensures YAML follows consistent formatting standards
+  - Validates `action.yml` syntax and structure
+  - Enforces formatting standards with custom rules
 
 **Quality Checks**:
 
-- YAML syntax validation
-- Line length checks (max 120)
-- Consistent indentation
-- Proper comment formatting
+- YAML syntax validation (ensures valid YAML structure)
+- Line length enforcement (max 120 characters)
+- Consistent indentation (2 or 4 spaces)
+- Comment spacing (minimum 1 space from content)
+- Proper YAML formatting standards
 
 ### 3. Release and Marketplace (`release.yml`)
 
