@@ -40,10 +40,8 @@ This guide provides a quick reference for using the GitHub workflows in this rep
 4. **Create Pull Request**:
    - Go to GitHub and create a PR to `main`
    - Wait for automated checks to complete:
-     - ✅ Test Action - validates all action features
-     - ✅ Lint & Test - checks code quality
+     - ✅ Lint & Test - validates YAML syntax
      - ✅ Changelog Check - verifies changelog update
-     - ✅ Security Audit - scans for vulnerabilities
 
 5. **Address any failures**:
    - Review workflow logs for errors
@@ -126,39 +124,16 @@ The action.yml already includes marketplace metadata:
 - Branding (icon, color)
 - All required fields
 
-### Managing Dependabot
+### Monitoring Action Usage
 
-Dependabot automatically creates PRs for dependency updates:
+1. **Check Workflow Runs**:
+   - Monitor the **Actions** tab for workflow results
+   - Review any failures promptly
 
-1. **Review Dependabot PRs** weekly:
-   - Check for breaking changes
-   - Review release notes of updated dependencies
-   - Ensure all tests pass
-
-2. **Merge safe updates**:
-   - Patch updates (e.g., 1.0.1 → 1.0.2) - usually safe
-   - Minor updates (e.g., 1.0.0 → 1.1.0) - review changes
-   - Major updates are ignored by default
-
-3. **Batch merge**:
-   - Can merge multiple Dependabot PRs at once
-   - Update changelog with "Updated dependencies" entry
-
-### Monitoring Security
-
-1. **Daily Security Audits**:
-   - Runs automatically at 2 AM UTC
-   - Check **Actions** tab for results
-   - Review any security findings
-
-2. **Security Alerts**:
-   - Check **Security** tab regularly
-   - Review Dependabot alerts
-   - Review CodeQL findings
-
-3. **Artifacts**:
-   - Security workflows upload detailed reports
-   - Download artifacts from workflow runs for analysis
+2. **Review Logs**:
+   - Click on failed workflow runs to see detailed logs
+   - Address YAML syntax errors
+   - Fix changelog format issues
 
 ## Workflow Triggers
 
@@ -166,11 +141,9 @@ Dependabot automatically creates PRs for dependency updates:
 
 | Workflow | PR to main | Push to main | Schedule | Manual |
 |----------|-----------|--------------|----------|--------|
-| test-action.yml | ✅ (if action files change) | ✅ (if action files change) | ❌ | ✅ |
 | changelog-check.yml | ✅ | ❌ | ❌ | ❌ |
 | lint-test.yml | ✅ | ✅ | ❌ | ✅ |
 | release.yml | ❌ | ✅ | ❌ | ✅ |
-| security-audit.yml | ✅ | ✅ | ✅ (daily) | ✅ |
 
 ### Manual Workflow Dispatch
 
@@ -193,9 +166,7 @@ To manually run any workflow:
 1. Click "Details" to view logs
 2. Common issues:
    - **Changelog Check fails**: Update CHANGELOG.md
-   - **Lint fails**: Fix code formatting with Black
-   - **Tests fail**: Review test logs, fix code
-   - **Security scan fails**: Review and fix security issues
+   - **YAML Lint fails**: Fix YAML syntax errors
 
 ### Release Not Created
 
@@ -220,24 +191,24 @@ To manually run any workflow:
 
 2. Push to main or run release workflow manually
 
-### Test Action Workflow Fails
+### YAML Linting Fails
 
-**Symptom**: test-action.yml fails
+**Symptom**: lint-test.yml fails
 
 **Common causes**:
 
-1. **Action.yml syntax error**: Validate YAML
-2. **Script error**: Check update_badges.py
-3. **Missing dependencies**: Check action setup steps
+1. **Action.yml syntax error**: Validate YAML syntax
+2. **Workflow file errors**: Check workflow YAML files
+3. **Line length issues**: Lines exceeding 120 characters
 
 **Debug**:
 
-1. View workflow logs
-2. Test action locally with act (if available)
-3. Test update_badges.py manually:
+1. View workflow logs for specific errors
+2. Validate YAML locally:
 
    ```bash
-   python3 update_badges.py --help
+   python -c "import yaml; yaml.safe_load(open('action.yml'))"
+   yamllint .github/workflows/
    ```
 
 ## Best Practices
