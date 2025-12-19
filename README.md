@@ -94,7 +94,7 @@ jobs:
         uses: thoughtparametersllc/python-linting@v1
         with:
           python-version: ${{ matrix.python-version }}
-          commit-badges: 'false'  # Only one job should commit badges
+          commit-badges: ${{ matrix.python-version == '3.11' && 'true' || 'false' }}  # Only the Python 3.11 job commits badges
 ```
 
 ## Inputs
@@ -321,14 +321,13 @@ on: [push]
 jobs:
   lint:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./python-service
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
       
+      # Note: The action runs from repository root regardless of working-directory settings
+      # Specify full paths from root for requirements-file and Python code location
       - name: Python Linting
         uses: thoughtparametersllc/python-linting@v1
         with:
