@@ -274,8 +274,10 @@ python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 
-[tool.pylint.messages_control]
+[tool.pylint.format]
 max-line-length = 120
+
+[tool.pylint.messages_control]
 disable = ["C0111", "C0103"]
 ```
 
